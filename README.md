@@ -1,86 +1,87 @@
-# ACE-ToolingTemplate
-
-Template repository for management of ACE code. This repo should be used as the framework for maintaining ACE code that is not a part of the Launchpad stack
+# Coalfire Azure Windows Virtual Machine
 
 ## Description
 
-- Terraform Version:
-- Cloud(s) supported:{Government/Commercial}
-- Product Version/License:
-- FedRAMP Compliance Support: {}
-- DoD Compliance Support:{IL4/5}
-- Misc Framework Support:
-- Launchpad validated version:
+This module creates a Windows Virtual Machine using managed disks
 
-## Setup and usage
+## Resource List
+- VM
+- VM Nic
+- Public IP
+- AKV secret
+- Diagnostics extension
+- Network watcher extension
 
-Describes what changes are needed to leverage this code. Likely should have several sub headings including items as
+## Inputs
 
-- process/structure for code modifications in the version of Launchpad listed above
-- modules/output/variable updates
-- removal of existing LP technology
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:-----:|
+| vm_name | Azure Virtual Machine Name | string | N/A | yes |
+| location | Azure region for resource deployment | string | N/A | yes |
+| resource_group_name | Azure Resource Group resource will be deployed in | string | N/A | yes |
+| vm_admin_username | Local Administrator name | string | N/A | yes |
+| subnet_id | ID of the subnet the VM NIC should be attached to | string | N/A | yes |
+| dj_kv_id | Domain Join Key Vault Resource ID | string | N/A | yes |
+| source_image_id | VM image from shared image gallery (Needs to support multi-session) | string | N/A | yes |
+| ssh_public_key | The Public Key which should be used for authentication | string | N/A | yes |
+| storage_account_vmdiag_name | Storage Account name VM diagnostics are stored in | string | N/A | yes |
+| vm_diag_sa | Storage Account name VM diagnostics are stored in | string | N/A | yes |
+| regional_tags | Regional level tags | map(string) | N/A | yes |
+| global_tags | Global level tags | map(string) | N/A | yes |
+| enable_public_ip | True/False if a Public IP Address should be attached to the VM | bool | N/A | yes |
+| diagnostics_storage_account_key | Storage Account key for diagnostics | string | N/A | yes |
+| size | Azure Virtual Machine size | string | Standard_DS2_v2 | no |
+| availability_set_id | Azure Availability VM should be attached to | string | null | no |
+| vm_tags | Key/Value tags that should be added to the VM | map(string) | {} | no |
+| private_ip_address_allocation | Dyanmic or Static | string | Dynamic | no |
+| private_ip | Static Private IP address | string | null | no |
+| disk_caching | Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite] | string | ReadWrite | no |
+| vm_storage_account_type | The Type of Storage Account which should back the OS Disk | string | StandardSSD_LRS | no |
+| disk_size | Size of the Disk | number | 127 | no |
+| custom_dns_label | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | string | "" | no |
+| public_ip_sku | Sku for the public IP attached to the VM. Can be `null` if no public IP needed | string | Standard | no | 
 
-### Code Location
+## Outputs
 
-Code should be stored in terraform/app/code
+| Name | Description |
+|------|-------------|
+| vm_system_identity | Virtual Machine System Managed Identity | 
+| vm_id | Virtual Machine Resource ID | 
+| vm_name | Virtual Machine Name |
+| vm_xadm_kv_name | The name which the local admin password for the 'xadm' account is stored under in Key Vault |
+| network_interface_ids | IDs of the VM NICs provisoned | 
+| network_interface_private_ip | Private IP addresses of the VM NICs |
+| public_ip_id | ID of the public IP address provisoned |
+| public_ip_address | The IP address allocated for the resource |
+| public_ip_dns_name | FQDN to connect to the first VM provisioned |
 
-### Code updates
+## Usage
 
-Ensure that vars zyx are in regional/global vars
+```hcl
+module "ca1" {
+  source = "../../../../modules/coalfire-az-windows-vm"
 
-## Issues
-
-Bug fixes and enhancements are managed, tracked, and discussed through the GitHub issues on this repository.
-
-Issues should be flagged appropriately.
-
-- Bug
-- Enhancement
-- Documentation
-- Code
-
-### Bugs
-
-Bugs are problems that exist with the technology or code that occur when expected behavior does not match implementation.
-For example, spelling mistakes on a dashboard.
-
-Use the Bug fix template to describe the issue and expected behaviors.
-
-### Enhancements
-
-Updates and changes to the code to support additional functionality, new features or improve engineering or operations usage of the technology.
-For example, adding a new widget to a dashboard to report on failed backups is enhancement.
-
-Use the Enhancement issue template to request enhancements to the codebase. Enhancements should be improvements that are applicable to wide variety of clients and projects. One of updates for a specific project should be handled locally. If you are unsure if something qualifies for an enhancement contact the repository code owner.
-
-### Pull Requests
-
-Code updates ideally are limited in scope to address one enhancement or bug fix per PR. The associated PR should be linked to the relevant issue.
-
-### Code Owners
-
-- Primary Code owner: Douglas Francis (@douglas-f)
-- Backup Code owner: James Westbrook (@i-ate-a-vm)
-
-The responsibility of the code owners is to approve and Merge PR's on the repository, and generally manage and direct issue discussions.
-
-## Repository Settings
-
-Settings that should be applied to repos
-
-### Branch Protection
-
-#### main Branch
-
-- Require a pull request before merging
-- Require Approvals
-- Dismiss stale pull requests approvals when new commits are pushed
-- Require review from Code Owners
-
-#### other branches
-
-- add as needed
-
-### GitHub Actions
-
-Future state. There are current inatitives for running CI/CD tooling as GitHub actions.
+  vm_name                       = length("${local.vm_name_prefix}ca") <= 15 ? "${local.vm_name_prefix}ca" : "${var.app_abbreviation}${var.environment}${var.location_abbreviation}ca"
+  vm_admin_username             = var.vm_admin_username
+  location                      = var.location
+  resource_group_name           = data.terraform_remote_state.setup.outputs.management_rg_name
+  size                          = "Standard_B2ms"
+  source_image_id               = data.terraform_remote_state.setup.outputs.windows_ca_id
+  availability_set_id           = module.ad_availability_set.availability_set_id
+  enable_public_ip              = false
+  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-iam-sn-1"]
+  private_ip_address_allocation = "Static"
+  private_ip                    = cidrhost(data.terraform_remote_state.usgv_mgmt_vnet.outputs.networks[1]["cidr_block"], 6)
+  dj_kv_id                      = data.terraform_remote_state.usgv_key_vaults.outputs.usgv_dj_kv_id
+  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
+  regional_tags                 = var.regional_tags
+  global_tags                   = var.global_tags
+  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
+  vm_tags = {
+    OS         = "Windows_2019"
+    Function   = "CA"
+    Plane      = "Management"
+    Stopinator = "False"
+  }
+}
+```
