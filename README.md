@@ -7,6 +7,7 @@
 This module creates a Windows Virtual Machine using managed disks
 
 ### **Resource List**
+
 - VM
 - VM Nic
 - Public IP
@@ -40,18 +41,18 @@ This module creates a Windows Virtual Machine using managed disks
 | disk_caching | Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite] | string | ReadWrite | no |
 | vm_storage_account_type | The Type of Storage Account which should back the OS Disk | string | StandardSSD_LRS | no |
 | disk_size | Size of the Disk | number | 127 | no |
-| custom_dns_label | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | string | "" | no |
-| public_ip_sku | Sku for the public IP attached to the VM. Can be `null` if no public IP needed | string | Standard | no | 
+| custom_dns_label | The DNS label to use for public access. VM name if not set. DNS will be \<label\>.eastus2.cloudapp.azure.com | string | "" | no |
+| public_ip_sku | Sku for the public IP attached to the VM. Can be `null` if no public IP needed | string | Standard | no |
 
 ### **Outputs**
 
 | Name | Description |
 |------|-------------|
-| vm_system_identity | Virtual Machine System Managed Identity | 
-| vm_id | Virtual Machine Resource ID | 
+| vm_system_identity | Virtual Machine System Managed Identity |
+| vm_id | Virtual Machine Resource ID |
 | vm_name | Virtual Machine Name |
 | vm_xadm_kv_name | The name which the local admin password for the 'xadm' account is stored under in Key Vault |
-| network_interface_ids | IDs of the VM NICs provisoned | 
+| network_interface_ids | IDs of the VM NICs provisoned |
 | network_interface_private_ip | Private IP addresses of the VM NICs |
 | public_ip_id | ID of the public IP address provisoned |
 | public_ip_address | The IP address allocated for the resource |
