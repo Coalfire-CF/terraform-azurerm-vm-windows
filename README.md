@@ -1,10 +1,12 @@
 # Coalfire Azure Windows Virtual Machine
 
-## Description
+## v1.0.0 - 2022-08-30
+
+### **Description**
 
 This module creates a Windows Virtual Machine using managed disks
 
-## Resource List
+### **Resource List**
 - VM
 - VM Nic
 - Public IP
@@ -12,7 +14,7 @@ This module creates a Windows Virtual Machine using managed disks
 - Diagnostics extension
 - Network watcher extension
 
-## Inputs
+### **Inputs**
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:-----:|
@@ -41,7 +43,7 @@ This module creates a Windows Virtual Machine using managed disks
 | custom_dns_label | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | string | "" | no |
 | public_ip_sku | Sku for the public IP attached to the VM. Can be `null` if no public IP needed | string | Standard | no | 
 
-## Outputs
+### **Outputs**
 
 | Name | Description |
 |------|-------------|
@@ -55,7 +57,7 @@ This module creates a Windows Virtual Machine using managed disks
 | public_ip_address | The IP address allocated for the resource |
 | public_ip_dns_name | FQDN to connect to the first VM provisioned |
 
-## Usage
+### **Usage**
 
 ```hcl
 module "ca1" {
