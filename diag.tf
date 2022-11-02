@@ -8,13 +8,13 @@ resource "azurerm_virtual_machine_extension" "vm_network_watcher" {
   depends_on                 = [azurerm_virtual_machine_extension.diagnostics]
 }
 
-data "template_file" "diagnostics" {
-  template = file("${path.module}/../../../shellscripts/windows/winDiagnostics.json")
-  vars = {
-    resource_id  = azurerm_windows_virtual_machine.vm.id
-    storage_name = var.storage_account_vmdiag_name
-  }
-}
+# data "template_file" "diagnostics" {
+#   template = file("${path.module}/../../../shellscripts/windows/winDiagnostics.json")
+#   vars = {
+#     resource_id  = azurerm_windows_virtual_machine.vm.id
+#     storage_name = var.storage_account_vmdiag_name
+#   }
+# }
 
 resource "azurerm_virtual_machine_extension" "diagnostics" {
   name                       = "${var.vm_name}-diagnostics-extension"
@@ -23,7 +23,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
   type_handler_version       = "1.16"
   auto_upgrade_minor_version = "true"
   virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
-  settings                   = data.template_file.diagnostics.rendered
+  settings                   = templatefile("${path.module}/../../../shellscripts/windows/winDiagnostics.json", {resource_id  = azurerm_windows_virtual_machine.vm.id, storage_name = var.storage_account_vmdiag_name})
 
   # depends_on = [azurerm_virtual_machine_extension.domjoin]
 
