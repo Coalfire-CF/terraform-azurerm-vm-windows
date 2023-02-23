@@ -23,6 +23,4 @@ resource "azurerm_network_interface" "nic" {
     private_ip_address            = var.private_ip
     public_ip_address_id          = var.public_ip_sku == null ? null : join("", azurerm_public_ip.public_ip.*.id)
   }
-
-
 }

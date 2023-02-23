@@ -20,7 +20,7 @@ output "vm_name" {
 
 output "network_interface_ids" {
   value       = azurerm_network_interface.nic.*.id
-  description = "IDs of the VM NICs provisoned."
+  description = "IDs of the VM NICs provisioned."
 }
 
 output "network_interface_private_ip" {
@@ -30,7 +30,7 @@ output "network_interface_private_ip" {
 
 output "public_ip_id" {
   value       = azurerm_public_ip.public_ip.*.id
-  description = "ID of the public IP address provisoned."
+  description = "ID of the public IP address provisioned."
 }
 
 output "public_ip_address" {

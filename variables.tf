@@ -75,7 +75,7 @@ variable "subnet_id" {
 
 variable "private_ip_address_allocation" {
   type        = string
-  description = "Dyanmic or Static"
+  description = "Dynamic or Static"
   default     = "Dynamic"
 }
 
