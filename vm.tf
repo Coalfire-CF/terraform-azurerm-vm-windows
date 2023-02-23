@@ -12,21 +12,24 @@ resource "azurerm_key_vault_secret" "xadm_pass" {
   name         = "${var.vm_name}-lap"
   value        = random_password.lap.result
   key_vault_id = var.dj_kv_id
+  content_type = "password"
   tags = {
   }
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
-  name                  = var.vm_name
-  location              = var.location
-  resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.nic.id]
-  size                  = var.size
-  source_image_id       = var.source_image_id
-  admin_username        = var.vm_admin_username
-  admin_password        = random_password.lap.result
-  availability_set_id   = var.availability_set_id
-  zone                  = var.availability_zones
+  # checkov:skip=CKV_AZURE_50: We use extensions to manage tools and VM lifecycle. Track allowed extensions via Azure Policy"
+  name                       = var.vm_name
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  network_interface_ids      = [azurerm_network_interface.nic.id]
+  size                       = var.size
+  source_image_id            = var.source_image_id
+  admin_username             = var.vm_admin_username
+  admin_password             = random_password.lap.result
+  availability_set_id        = var.availability_set_id
+  zone                       = var.availability_zones
+  encryption_at_host_enabled = true
   boot_diagnostics {
     storage_account_uri = var.vm_diag_sa
   }
