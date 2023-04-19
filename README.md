@@ -63,7 +63,7 @@ module "windows_vm" {
   source = "github.com/Coalfire-CF/ACE-Azure-VM-Windows?ref=v1.0.0"
 
   vm_name                       = "${local.prefix}-vm"
-  vm_admin_username             = local.vm_admin_username
+  vm_admin_username             = var.vm_admin_username
   resource_group_name           = azurerm_resource_group.rg.name
   location                      = local.location
   size                          = "Standard_B2ms"
