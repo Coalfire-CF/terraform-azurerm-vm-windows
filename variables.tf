@@ -35,9 +35,9 @@ variable "availability_set_id" {
   default     = null
 }
 
-variable "availability_zones" {
-  type        = list(number)
-  description = "Specifies a list of Availability Zones in which the Windows VM should be located"
+variable "availability_zone" {
+  type        = string
+  description = "Specifies an Availability Zone in which the Windows VM should be located"
   default     = null
 }
 

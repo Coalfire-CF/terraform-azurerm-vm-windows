@@ -59,25 +59,26 @@ This module creates a Windows Virtual Machine using managed disks
 ### Usage
 
 ```hcl
-module "ca1" {
-  source = "../../../../modules/coalfire-az-windows-vm"
+module "windows_vm" {
+  source = "github.com/Coalfire-CF/ACE-Azure-VM-Windows?ref=v1.0.0"
 
-  vm_name                       = length("${local.vm_name_prefix}ca") <= 15 ? "${local.vm_name_prefix}ca" : "${var.app_abbreviation}${var.environment}${var.location_abbreviation}ca"
+  vm_name                       = "${local.prefix}-vm"
   vm_admin_username             = var.vm_admin_username
-  location                      = var.location
-  resource_group_name           = data.terraform_remote_state.setup.outputs.management_rg_name
+  resource_group_name           = azurerm_resource_group.rg.name
+  location                      = local.location
   size                          = "Standard_B2ms"
-  source_image_id               = data.terraform_remote_state.setup.outputs.windows_ca_id
-  availability_set_id           = module.ad_availability_set.availability_set_id
-  enable_public_ip              = false
-  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-iam-sn-1"]
-  private_ip_address_allocation = "Static"
-  private_ip                    = cidrhost(data.terraform_remote_state.usgv_mgmt_vnet.outputs.networks[1]["cidr_block"], 6)
+  source_image_id               = data.terraform_remote_state.setup.outputs.windows_golden_id
+  enable_public_ip              = true
+  subnet_id                     = data.terraform_remote_state.va-mgmt-network.outputs.usgv_mgmt_vnet_subnet_ids["de-prod-va-mp-bastion-sn-1"]
   dj_kv_id                      = data.terraform_remote_state.usgv_key_vaults.outputs.usgv_dj_kv_id
-  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
-  regional_tags                 = var.regional_tags
-  global_tags                   = var.global_tags
   storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
+  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
+  private_ip_address_allocation = "Dynamic"
+  #private_ip                    = cidrhost(data.terraform_remote_state.usgv_mgmt_vnet.outputs.networks[1]["cidr_block"], 6)
+  disk_size = 12
+
+  regional_tags = {}
+  global_tags   = {}
   vm_tags = {
     OS         = "Windows_2019"
     Function   = "CA"

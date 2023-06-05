@@ -23,7 +23,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
   type_handler_version       = "1.16"
   auto_upgrade_minor_version = "true"
   virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
-  settings                   = templatefile("${path.module}/../../../shellscripts/windows/winDiagnostics.json", {resource_id  = azurerm_windows_virtual_machine.vm.id, storage_name = var.storage_account_vmdiag_name})
+  settings                   = templatefile("${path.module}/shellscripts/winDiagnostics.json", { resource_id = azurerm_windows_virtual_machine.vm.id, storage_name = var.storage_account_vmdiag_name })
 
   # depends_on = [azurerm_virtual_machine_extension.domjoin]
 
