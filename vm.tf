@@ -28,6 +28,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_username             = var.vm_admin_username
   admin_password             = random_password.lap.result
   availability_set_id        = var.availability_set_id
+  secure_boot_enabled        = true
   zone                       = join("", var.availability_zone)
   encryption_at_host_enabled = true
   boot_diagnostics {
