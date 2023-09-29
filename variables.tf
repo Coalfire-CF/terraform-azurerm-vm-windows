@@ -24,9 +24,21 @@ variable "size" {
   default     = "Standard_DS2_v2"
 }
 
+variable "source_image_reference" {
+  type        = map(string)
+  description = "VM image from shared image gallery"
+  default = ({
+    publisher = "center-for-internet-security-inc"
+    offer     = "cis-win-2019-stig"
+    sku       = "cis-win-2019-stig"
+    version   = "latest"
+  })
+}
+
 variable "source_image_id" {
   type        = string
   description = "VM image from shared image gallery"
+  default     = null
 }
 
 variable "availability_set_id" {
