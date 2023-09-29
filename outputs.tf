@@ -4,7 +4,7 @@ output "vm_system_identity" {
 }
 
 output "vm_xadm_kv_name" {
-  value       = azurerm_key_vault_secret.xadm_pass.name
+  value       = azurerm_key_vault_secret.xadm_pass[0].name
   description = "The name which the local admin password for the 'xadm' account is stored under in Key Vault"
 }
 
