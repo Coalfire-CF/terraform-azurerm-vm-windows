@@ -106,6 +106,7 @@ variable "public_ip_sku" {
 variable "dj_kv_id" {
   type        = string
   description = "Domain Join Key Vault Resource ID"
+  default = null
 }
 
 variable "vm_diag_sa" {
