@@ -103,9 +103,9 @@ variable "public_ip_sku" {
   default     = "Standard"
 }
 
-variable "dj_kv_id" {
+variable "kv_id" {
   type        = string
-  description = "Domain Join Key Vault Resource ID"
+  description = "Key Vault Resource ID to store local admin password"
   default     = null
 }
 

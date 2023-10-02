@@ -9,10 +9,9 @@ resource "random_password" "lap" {
 }
 
 resource "azurerm_key_vault_secret" "xadm_pass" {
-  count        = var.dj_kv_id != null ? 1 : 0
   name         = "${var.vm_name}-lap"
   value        = random_password.lap.result
-  key_vault_id = var.dj_kv_id
+  key_vault_id = var.kv_id
   content_type = "password"
   tags = {
   }
