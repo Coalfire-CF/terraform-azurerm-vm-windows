@@ -24,14 +24,13 @@ variable "size" {
   default     = "Standard_DS2_v2"
 }
 
-variable "source_image_reference" {
+variable "plan" {
   type        = map(string)
   description = "VM image from shared image gallery"
-  default = ({
+  default     = ({
     publisher = "center-for-internet-security-inc"
-    offer     = "cis-win-2019-stig"
-    sku       = "cis-win-2019-stig"
-    version   = "latest"
+    name      = "cis-win-2019-stig"
+    product   = "cis-win-2019-stig"
   })
 }
 
