@@ -141,3 +141,8 @@ variable "disk_size" {
   default     = 127
 }
 
+variable "trusted_launch" {
+  type        = bool
+  description = "Enable Trusted Launch"
+  default     = true
+}
