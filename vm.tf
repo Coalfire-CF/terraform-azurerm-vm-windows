@@ -32,6 +32,13 @@ resource "azurerm_windows_virtual_machine" "vm" {
   zone                       = try(join("", var.availability_zone), null)
   encryption_at_host_enabled = true
 
+  source_image_reference {
+    publisher = var.source_image_reference["publisher"]
+    offer     = var.source_image_reference["offer"]
+    sku       = var.source_image_reference["sku"]
+    version   = var.source_image_reference["version"]
+  }
+
   plan {
     publisher = var.plan["publisher"]
     name      = var.plan["name"]
