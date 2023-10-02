@@ -11,7 +11,7 @@ resource "random_password" "lap" {
 resource "azurerm_key_vault_secret" "xadm_pass" {
   name         = "${var.vm_name}-lap"
   value        = random_password.lap.result
-  key_vault_id = var.dj_kv_id
+  key_vault_id = var.kv_id
   content_type = "password"
   tags = {
   }
@@ -28,9 +28,23 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_username             = var.vm_admin_username
   admin_password             = random_password.lap.result
   availability_set_id        = var.availability_set_id
-  secure_boot_enabled        = true
-  zone                       = join("", var.availability_zone)
+  secure_boot_enabled        = var.trusted_launch
+  zone                       = try(join("", var.availability_zone), null)
   encryption_at_host_enabled = true
+
+  source_image_reference {
+    publisher = var.source_image_reference["publisher"]
+    offer     = var.source_image_reference["offer"]
+    sku       = var.source_image_reference["sku"]
+    version   = var.source_image_reference["version"]
+  }
+
+  plan {
+    publisher = var.plan["publisher"]
+    name      = var.plan["name"]
+    product   = var.plan["product"]
+  }
+
   boot_diagnostics {
     storage_account_uri = var.vm_diag_sa
   }
