@@ -149,3 +149,19 @@ No modules.
 | <a name="output_vm_system_identity"></a> [vm\_system\_identity](#output\_vm\_system\_identity) | Virtual Machine System Managed Identity |
 | <a name="output_vm_xadm_kv_name"></a> [vm\_xadm\_kv\_name](#output\_vm\_xadm\_kv\_name) | The name which the local admin password for the 'xadm' account is stored under in Key Vault |
 <!-- END_TF_DOCS -->
+
+## Contributing
+
+[Start Here](CONTRIBUTING.md)
+
+## License
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit/)
+
+## Contact Us
+
+[Coalfire](https://coalfire.com/)
+
+### Copyright
+
+Copyright © 2023 Coalfire Systems Inc.
