@@ -1,89 +1,77 @@
-# Coalfire Azure Windows Virtual Machine
+![Coalfire](coalfire_logo.png)
 
-## Description
+# terraform-azurerm-vm-windows
 
-This module creates a Windows Virtual Machine using managed disks
+This module is used in the [Coalfire-Azure-RAMPpak](https://github.com/Coalfire-CF/Coalfire-Azure-RAMPpak) FedRAMP Framework. It will create a Windows Virtual Machine using managed disks.
 
-### Resource List
+Learn more at [Coalfire OpenSource](https://coalfire.com/opensource).
+
+## Dependencies
+
+- Security Core
+- Region Setup
+
+## Resource List
 
 - VM
 - VM Nic
-- Public IP
+- Public IP (optional)
 - AKV secret
 - Diagnostics extension
 - Network watcher extension
 
-### Inputs
+## Deployment Steps
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
-| vm_name | Azure Virtual Machine Name | string | N/A | yes |
-| location | Azure region for resource deployment | string | N/A | yes |
-| resource_group_name | Azure Resource Group resource will be deployed in | string | N/A | yes |
-| vm_admin_username | Local Administrator name | string | N/A | yes |
-| subnet_id | ID of the subnet the VM NIC should be attached to | string | N/A | yes |
-| dj_kv_id | Domain Join Key Vault Resource ID | string | N/A | yes |
-| source_image_id | VM image from shared image gallery (Needs to support multi-session) | string | N/A | yes |
-| ssh_public_key | The Public Key which should be used for authentication | string | N/A | yes |
-| storage_account_vmdiag_name | Storage Account name VM diagnostics are stored in | string | N/A | yes |
-| vm_diag_sa | Storage Account name VM diagnostics are stored in | string | N/A | yes |
-| regional_tags | Regional level tags | map(string) | N/A | yes |
-| global_tags | Global level tags | map(string) | N/A | yes |
-| enable_public_ip | True/False if a Public IP Address should be attached to the VM | bool | N/A | yes |
-| diagnostics_storage_account_key | Storage Account key for diagnostics | string | N/A | yes |
-| size | Azure Virtual Machine size | string | Standard_DS2_v2 | no |
-| availability_set_id | Azure Availability VM should be attached to | string | null | no |
-| vm_tags | Key/Value tags that should be added to the VM | map(string) | {} | no |
-| private_ip_address_allocation | Dynamic or Static | string | Dynamic | no |
-| private_ip | Static Private IP address | string | null | no |
-| disk_caching | Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite] | string | ReadWrite | no |
-| vm_storage_account_type | The Type of Storage Account which should back the OS Disk | string | StandardSSD_LRS | no |
-| disk_size | Size of the Disk | number | 127 | no |
-| custom_dns_label | The DNS label to use for public access. VM name if not set. DNS will be \<label\>.eastus2.cloudapp.azure.com | string | "" | no |
-| public_ip_sku | Sku for the public IP attached to the VM. Can be `null` if no public IP needed | string | Standard | no |
+This module can be called as outlined below.
 
-### Outputs
-
-| Name | Description |
-|------|-------------|
-| vm_system_identity | Virtual Machine System Managed Identity |
-| vm_id | Virtual Machine Resource ID |
-| vm_name | Virtual Machine Name |
-| vm_xadm_kv_name | The name which the local admin password for the 'xadm' account is stored under in Key Vault |
-| network_interface_ids | IDs of the VM NICs provisioned |
-| network_interface_private_ip | Private IP addresses of the VM NICs |
-| public_ip_id | ID of the public IP address provisioned |
-| public_ip_address | The IP address allocated for the resource |
-| public_ip_dns_name | FQDN to connect to the first VM provisioned |
+- Change directories to the `Bastion` directory.
+- From the `/terraform/prod/us-va/mgmt/bastion` directory run `terraform init`.
+- Run `terraform plan` to review the resources being created.
+- If everything looks correct in the plan output, run `terraform apply`.
 
 ### Usage
 
 ```hcl
-module "windows_vm" {
-  source = "github.com/Coalfire-CF/ACE-Azure-VM-Windows?ref=v1.0.0"
+provider "azurerm" {
+  features {}
+}
 
-  vm_name                       = "${local.prefix}-vm"
+module "bastion1" {
+  source = "github.com/Coalfire-CF/terraform-azurerm-vm-windows"
+
+  vm_name                       = "${local.vm_name_prefix}ba1"
   vm_admin_username             = var.vm_admin_username
-  resource_group_name           = azurerm_resource_group.rg.name
-  location                      = local.location
-  size                          = "Standard_B2ms"
-  source_image_id               = data.terraform_remote_state.setup.outputs.windows_golden_id
+  location                      = var.location
+  resource_group_name           = data.terraform_remote_state.core.outputs.core_rg_name
+  size                          = "Standard_DS2_v2"
   enable_public_ip              = true
-  subnet_id                     = data.terraform_remote_state.va-mgmt-network.outputs.usgv_mgmt_vnet_subnet_ids["de-prod-va-mp-bastion-sn-1"]
-  dj_kv_id                      = data.terraform_remote_state.usgv_key_vaults.outputs.usgv_dj_kv_id
-  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
-  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
+  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-bastion-sn-1"]
   private_ip_address_allocation = "Dynamic"
-  #private_ip                    = cidrhost(data.terraform_remote_state.usgv_mgmt_vnet.outputs.networks[1]["cidr_block"], 6)
-  disk_size = 12
+  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
+  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
+  kv_id                         = data.terraform_remote_state.core.outputs.core_kv_id
+  trusted_launch                = false # For now, we are not using trusted launch. Fails with the CIS marketplace image.
 
-  regional_tags = {}
-  global_tags   = {}
+  regional_tags                 = var.regional_tags
+  global_tags                   = var.global_tags
+
+  source_image_reference = {
+    publisher = "center-for-internet-security-inc"
+    offer     = "cis-win-2019-stig"
+    sku       = "cis-win-2019-stig"
+    version   = "latest"
+  }
+
+  plan = {
+    publisher = "center-for-internet-security-inc"
+    name      = "cis-win-2019-stig"
+    product   = "cis-win-2019-stig"
+  }
+
   vm_tags = {
-    OS         = "Windows_2019"
-    Function   = "CA"
-    Plane      = "Management"
-    Stopinator = "False"
+    OS       = "Windows_STIG_2019"
+    Function = "Bastion"
+    Plane    = "Management"
   }
 }
 ```
