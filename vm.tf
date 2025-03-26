@@ -42,10 +42,13 @@ resource "azurerm_windows_virtual_machine" "vm" {
     }
   }
 
-  plan {
-    publisher = var.plan["publisher"]
-    name      = var.plan["name"]
-    product   = var.plan["product"]
+  dynamic "plan" {
+    for_each = var.source_image_reference != null && var.plan != null ? [1] : []
+    content {
+      publisher = var.plan.publisher
+      name      = var.plan.name
+      product   = var.plan.product
+    }
   }
 
   boot_diagnostics {

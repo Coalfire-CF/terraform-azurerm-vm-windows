@@ -36,13 +36,13 @@ variable "source_image_reference" {
 }
 
 variable "plan" {
-  type        = map(string)
-  description = "VM plan from marketplace"
-  default = ({
-    publisher = "center-for-internet-security-inc"
-    name      = "cis-win-2019-stig"
-    product   = "cis-win-2019-stig"
+  type = object({
+    publisher = string
+    name      = string
+    product   = string
   })
+  description = "Marketplace plan info — only required if using a Marketplace image that includes a plan."
+  default     = null
 }
 
 variable "source_image_id" {
