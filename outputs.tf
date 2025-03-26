@@ -18,15 +18,15 @@ output "vm_name" {
   description = "Virtual Machine Name"
 }
 
-output "network_interface_ids" {
-  value       = azurerm_network_interface.nic.*.id
-  description = "IDs of the VM NICs provisioned."
-}
+# output "network_interface_ids" {
+#   value       = azurerm_network_interface.nic.*.id
+#   description = "IDs of the VM NICs provisioned."
+# }
 
-output "network_interface_private_ip" {
-  value       = azurerm_network_interface.nic.*.private_ip_address
-  description = "Private IP addresses of the VM NICs"
-}
+# output "network_interface_private_ip" {
+#   value       = azurerm_network_interface.nic.*.private_ip_address
+#   description = "Private IP addresses of the VM NICs"
+# }
 
 # output "public_ip_id" {
 #   value       = azurerm_public_ip.public_ip.*.id
