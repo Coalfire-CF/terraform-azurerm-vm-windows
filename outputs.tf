@@ -28,17 +28,17 @@ output "network_interface_private_ip" {
   description = "Private IP addresses of the VM NICs"
 }
 
-output "public_ip_id" {
-  value       = azurerm_public_ip.public_ip.*.id
-  description = "ID of the public IP address provisioned."
-}
+# output "public_ip_id" {
+#   value       = azurerm_public_ip.public_ip.*.id
+#   description = "ID of the public IP address provisioned."
+# }
 
-output "public_ip_address" {
-  value       = azurerm_public_ip.public_ip.*.ip_address
-  description = "The IP address allocated for the resource."
-}
+# output "public_ip_address" {
+#   value       = azurerm_public_ip.public_ip.*.ip_address
+#   description = "The IP address allocated for the resource."
+# }
 
-output "public_ip_dns_name" {
-  value       = azurerm_public_ip.public_ip.*.fqdn
-  description = "FQDN to connect to the first VM provisioned."
-}
+# output "public_ip_dns_name" {
+#   value       = azurerm_public_ip.public_ip.*.fqdn
+#   description = "FQDN to connect to the first VM provisioned."
+# }

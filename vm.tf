@@ -31,19 +31,20 @@ resource "azurerm_windows_virtual_machine" "vm" {
   secure_boot_enabled        = var.trusted_launch
   zone                       = try(join("", var.availability_zone), null)
   encryption_at_host_enabled = true
+  
 
-  source_image_reference {
-    publisher = var.source_image_reference["publisher"]
-    offer     = var.source_image_reference["offer"]
-    sku       = var.source_image_reference["sku"]
-    version   = var.source_image_reference["version"]
-  }
+  # source_image_reference {
+  #   publisher = var.source_image_reference["publisher"]
+  #   offer     = var.source_image_reference["offer"]
+  #   sku       = var.source_image_reference["sku"]
+  #   version   = var.source_image_reference["version"]
+  # }
 
-  plan {
-    publisher = var.plan["publisher"]
-    name      = var.plan["name"]
-    product   = var.plan["product"]
-  }
+  # plan {
+  #   publisher = var.plan["publisher"]
+  #   name      = var.plan["name"]
+  #   product   = var.plan["product"]
+  # }
 
   boot_diagnostics {
     storage_account_uri = var.vm_diag_sa
