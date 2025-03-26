@@ -30,7 +30,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   availability_set_id        = var.availability_set_id
   secure_boot_enabled        = var.trusted_launch
   zone                       = try(join("", var.availability_zone), null)
-  encryption_at_host_enabled = true
+  encryption_at_host_enabled = false
   
 
   # source_image_reference {
