@@ -24,7 +24,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   resource_group_name        = var.resource_group_name
   network_interface_ids      = [azurerm_network_interface.nic.id]
   size                       = var.size
-  source_image_id            = var.source_image_id
+  source_image_id            = var.source_image_reference == null ? var.source_image_id : null
   admin_username             = var.vm_admin_username
   admin_password             = random_password.lap.result
   availability_set_id        = var.availability_set_id
@@ -32,11 +32,14 @@ resource "azurerm_windows_virtual_machine" "vm" {
   zone                       = try(join("", var.availability_zone), null)
   encryption_at_host_enabled = true
 
-  source_image_reference {
-    publisher = var.source_image_reference["publisher"]
-    offer     = var.source_image_reference["offer"]
-    sku       = var.source_image_reference["sku"]
-    version   = var.source_image_reference["version"]
+  dynamic "source_image_reference" {
+    for_each = var.source_image_reference != null ? [1] : []
+    content {
+      publisher = var.source_image_reference.publisher
+      offer     = var.source_image_reference.offer
+      sku       = var.source_image_reference.sku
+      version   = var.source_image_reference.version
+    }
   }
 
   plan {

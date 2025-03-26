@@ -25,20 +25,20 @@ variable "size" {
 }
 
 variable "source_image_reference" {
-  type        = map(string)
-  description = "VM image from shared image gallery"
-  default = ({
-    publisher = "center-for-internet-security-inc"
-    offer     = "cis-win-2019-stig"
-    sku       = "cis-win-2019-stig"
-    version   = "latest"
+  type = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
   })
+  description = "VM image from shared image gallery"
+  default     = null
 }
 
 variable "plan" {
   type        = map(string)
   description = "VM plan from marketplace"
-  default     = ({
+  default = ({
     publisher = "center-for-internet-security-inc"
     name      = "cis-win-2019-stig"
     product   = "cis-win-2019-stig"
