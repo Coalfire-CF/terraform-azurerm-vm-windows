@@ -1,3 +1,11 @@
+data "azurerm_shared_image_version" "sig_image" {
+  count               = var.use_shared_image ? 1 : 0
+  name                = var.sig_image_version
+  image_name          = var.sig_image_name
+  gallery_name        = var.sig_gallery_name
+  resource_group_name = var.sig_resource_group
+}
+
 resource "random_password" "lap" {
   length           = 15
   special          = true
