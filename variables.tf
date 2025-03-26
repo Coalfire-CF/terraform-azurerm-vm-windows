@@ -49,11 +49,6 @@ variable "source_image_id" {
   type        = string
   description = "VM image from shared image gallery"
   default     = null
-
-  validation {
-    condition     = (var.source_image_id != null && var.source_image_reference == null) || (var.source_image_id == null)
-    error_message = "Exactly one of source_image_id or source_image_reference must be provided — not both."
-  }
 }
 
 variable "availability_set_id" {
