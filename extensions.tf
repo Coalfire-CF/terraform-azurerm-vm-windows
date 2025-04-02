@@ -43,8 +43,8 @@ resource "azurerm_virtual_machine_extension" "custom_extension" {
   depends_on                 = [time_sleep.wait_180_seconds]
   name                       = "custom_extension"
   virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
-  publisher                  = "Microsoft.Azure.Extensions"
-  type                       = "CustomScript"
+  publisher                  = "Microsoft.Compute"
+  type                       = "CustomScriptExtension"
   auto_upgrade_minor_version = "true"
   type_handler_version       = "2.1"
 
