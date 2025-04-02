@@ -175,13 +175,13 @@ variable "is_domain_join" {
 
 variable "domain_join" {
   type = object({
-    domain_name              = string
-    disname                  = string
-    windwows_admins_ad_group = string
-    user_name                = string
-    azure_cloud              = string
-    windows_domainjoin_url   = string
-    dj_kv_id                 = string
+    domain_name             = string
+    disname                 = string
+    windows_admins_ad_group = string
+    user_name               = string
+    azure_cloud             = string
+    windows_domainjoin_url  = string
+    dj_kv_id                = string
   })
   description = "Map with information required to join the vm to the domain"
   default     = null
