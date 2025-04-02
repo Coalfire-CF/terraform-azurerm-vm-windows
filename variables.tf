@@ -156,3 +156,20 @@ variable "trusted_launch" {
   description = "Enable Trusted Launch"
   default     = true
 }
+
+variable "is_domain_join" {
+  type        = bool
+  description = "Set this to false to skip the domain join script extension. Defaults to true"
+  default     = true
+}
+
+variable "sa_install_id" {
+  type        = string
+  description = "Storage account id containing the install scripts"
+}
+
+variable "custom_role_assignments" {
+  type        = list(any)
+  description = "Map with custom role assignments to grant to the VM system identity"
+  default     = []
+}
