@@ -48,13 +48,9 @@ resource "azurerm_virtual_machine_extension" "custom_extension" {
   auto_upgrade_minor_version = "true"
   type_handler_version       = "1.10"
 
-
-  settings = jsonencode({
-    "fileUris" = local.fileUris
-  })
-
   protected_settings = jsonencode({
-    "commandToExecute" = local.commandToExecute
     "managedIdentity"  = ""
+    "commandToExecute" = local.commandToExecute
+    "fileUris"         = local.fileUris
   })
 }
