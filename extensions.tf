@@ -33,7 +33,7 @@ resource "azurerm_virtual_machine_extension" "windows_domain_join" {
     "fileUris" = concat(
       [
         var.domain_join.linux_domainjoin_url,
-        var.linux_monitor_agent_url
+        var.windows_monitor_agent_url
       ],
       var.custom_scripts_fileUris
     )

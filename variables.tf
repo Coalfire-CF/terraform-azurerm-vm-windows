@@ -173,3 +173,25 @@ variable "custom_role_assignments" {
   description = "Map with custom role assignments to grant to the VM system identity"
   default     = []
 }
+
+variable "custom_scripts" {
+  type        = string
+  description = "Custom scripts with its arguments. Will be added to custom script extension."
+  default     = ""
+  sensitive   = true
+  validation {
+    condition     = var.custom_scripts != "" ? substr(var.custom_scripts, -1, -1) == ";" : var.custom_scripts == ""
+    error_message = "The custom scripts must include a semicolon (;) at the end of the string."
+  }
+}
+
+variable "custom_scripts_fileUris" {
+  type        = list(string)
+  description = "List with storage URLs to download custom scripts"
+  default     = []
+}
+
+variable "windows_monitor_agent_url" {
+  type        = string
+  description = "Storage URL to download the Azure monitor install script"
+}
