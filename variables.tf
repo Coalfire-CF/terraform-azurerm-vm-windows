@@ -3,6 +3,16 @@ variable "vm_name" {
   description = "Azure Virtual Machine Name"
 }
 
+variable "vm_hostname" {
+  type        = string
+  description = "(Optional) Hostname for the virtual machine. Must be 15 characters or less."
+  validation {
+    condition     = length(var.vm_hostname) <= 15
+    error_message = "VM hostname must be 15 characters or less in length"
+  }
+  default = null
+}
+
 variable "location" {
   type        = string
   description = "Azure region for resource deployment"

@@ -20,6 +20,7 @@ resource "azurerm_key_vault_secret" "xadm_pass" {
 resource "azurerm_windows_virtual_machine" "vm" {
   # checkov:skip=CKV_AZURE_50: We use extensions to manage tools and VM lifecycle. Track allowed extensions via Azure Policy"
   name                       = var.vm_name
+  computer_name              = var.hostname != null ? var.hostname : var.vm_name
   location                   = var.location
   resource_group_name        = var.resource_group_name
   network_interface_ids      = [azurerm_network_interface.nic.id]
