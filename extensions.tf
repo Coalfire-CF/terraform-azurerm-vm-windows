@@ -27,7 +27,6 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 SETTINGS
 }
 
-
 #Wait for role assignments to propagate before installing extensions (otherwise extension will fail to download scripts)
 resource "time_sleep" "wait_180_seconds" {
   create_duration = "180s"
