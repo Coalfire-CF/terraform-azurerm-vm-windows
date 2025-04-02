@@ -209,3 +209,8 @@ variable "dj_kv_name" {
   description = "Key Vault name containing the domain join user password"
   default     = null
 }
+
+variable "sa_install_id" {
+  type        = string
+  description = "Storage account id containing the install scripts"
+}
