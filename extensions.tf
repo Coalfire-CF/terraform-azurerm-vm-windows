@@ -55,6 +55,6 @@ resource "azurerm_virtual_machine_extension" "custom_extension" {
 
   protected_settings = jsonencode({
     "commandToExecute" = local.commandToExecute
-    "managedIdentity"  = {}
+    "managedIdentity"  = ""
   })
 }
