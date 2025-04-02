@@ -46,7 +46,7 @@ resource "azurerm_virtual_machine_extension" "custom_extension" {
   publisher                  = "Microsoft.Compute"
   type                       = "CustomScriptExtension"
   auto_upgrade_minor_version = "true"
-  type_handler_version       = "2.1"
+  type_handler_version       = "1.10"
 
 
   settings = jsonencode({
