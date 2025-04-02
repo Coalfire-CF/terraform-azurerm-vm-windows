@@ -27,48 +27,25 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 SETTINGS
 }
 
-# # IF DOMAIN JOIN: Join VM to domain and install custom scripts if any
-# resource "azurerm_virtual_machine_extension" "custom_extension_domainjoin" {
-#   count                      = var.is_domain_join ? 1 : 0
-#   name                       = "ud-dj"
-#   virtual_machine_id         = azurerm_linux_virtual_machine.vm.id
-#   publisher                  = "Microsoft.Azure.Extensions"
-#   type                       = "CustomScript"
-#   auto_upgrade_minor_version = "true"
-#   type_handler_version       = "2.1"
-#   depends_on = [
-#     time_sleep.wait_180_seconds
-#   ]
+# Domain Join and Custom Script Extensions
+resource "azurerm_virtual_machine_extension" "custom_extension" {
+  count                      = var.is_domain_join || var.custom_scripts_fileUris != null ? 1 : 0
+  name                       = "custom_extension"
+  virtual_machine_id         = azurerm_windows_virtual_machine.vm.id
+  publisher                  = "Microsoft.Azure.Extensions"
+  type                       = "CustomScript"
+  auto_upgrade_minor_version = "true"
+  type_handler_version       = "2.1"
+  depends_on = [
+    time_sleep.wait_180_seconds
+  ]
 
-#   settings = jsonencode({
-#     "fileUris" = concat([var.domain_join.linux_domainjoin_url, var.linux_monitor_agent_url], var.custom_scripts_fileUris)
-#   })
+  settings = jsonencode({
+    "fileUris" = local.fileUris
+  })
 
-#   protected_settings = jsonencode({
-#     "commandToExecute" = "./ud_linux_join_ad.sh -d \"${var.domain_join.domain_name}\" -dis \"${var.domain_join.disname}\" -a \"${var.domain_join.linux_admins_ad_group}\" -u \"${var.domain_join.user_name}\" -v \"${local.dj_kv_name}\" --host \"${azurerm_linux_virtual_machine.vm.name}\" -c \"${var.domain_join.azure_cloud}\";${chomp(var.custom_scripts)} exit 0"
-#     "managedIdentity"  = {}
-#   })
-# }
-
-# # IF NOT DOMAIN JOIN: Join VM to domain and install custom scripts if any
-# resource "azurerm_virtual_machine_extension" "ud_dj_custom_extension" {
-#   count                      = var.is_domain_join ? 0 : 1
-#   name                       = "ud-dj"
-#   virtual_machine_id         = azurerm_linux_virtual_machine.vm.id
-#   publisher                  = "Microsoft.Azure.Extensions"
-#   type                       = "CustomScript"
-#   auto_upgrade_minor_version = "true"
-#   type_handler_version       = "2.1"
-#   depends_on = [
-#     time_sleep.wait_180_seconds
-#   ]
-
-#   settings = jsonencode({
-#     "fileUris" = var.custom_scripts_fileUris
-#   })
-
-#   protected_settings = jsonencode({
-#     "commandToExecute" = "${chomp(var.custom_scripts)} exit 0"
-#     "managedIdentity"  = {}
-#   })
-# }
+  protected_settings = jsonencode({
+    "commandToExecute" = local.commandToExecute
+    "managedIdentity"  = {}
+  })
+}
