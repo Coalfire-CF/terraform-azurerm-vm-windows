@@ -170,7 +170,7 @@ variable "trusted_launch" {
 variable "is_domain_join" {
   type        = bool
   description = ""
-  default     = true
+  default     = false
 }
 
 variable "custom_scripts_fileUris" {
