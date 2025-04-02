@@ -49,7 +49,7 @@ resource "azurerm_virtual_machine_extension" "custom_extension" {
   type_handler_version       = "1.10"
 
   protected_settings = jsonencode({
-    "managedIdentity"  = ""
+    "managedIdentity"  = {}
     "commandToExecute" = local.commandToExecute
     "fileUris"         = local.fileUris
   })
