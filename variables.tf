@@ -173,6 +173,20 @@ variable "is_domain_join" {
   default     = false
 }
 
+variable "domain_join" {
+  type = object({
+    domain_name              = string
+    disname                  = string
+    windwows_admins_ad_group = string
+    user_name                = string
+    azure_cloud              = string
+    windows_domainjoin_url   = string
+    dj_kv_id                 = string
+  })
+  description = "Map with information required to join the vm to the domain"
+  default     = null
+}
+
 variable "custom_scripts_fileUris" {
   type        = list(string)
   description = "List with storage URLs to download custom scripts"
