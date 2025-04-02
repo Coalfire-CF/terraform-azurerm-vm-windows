@@ -189,3 +189,9 @@ variable "custom_scripts" {
     error_message = "The custom scripts must include a semicolon (;) at the end of the string."
   }
 }
+
+variable "dj_kv_name" {
+  type        = string
+  description = "Key Vault name containing the domain join user password"
+  default     = null
+}
