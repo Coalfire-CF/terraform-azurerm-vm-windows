@@ -33,7 +33,7 @@ resource "time_sleep" "wait_180_seconds" {
   depends_on = [
     azurerm_role_assignment.sa_install_assignment,
     azurerm_role_assignment.dj_kv_assignment,
-    # azurerm_role_assignment.custom_assignments
+    azurerm_role_assignment.custom_assignments
   ]
 }
 
