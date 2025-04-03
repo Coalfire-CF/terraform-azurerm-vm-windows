@@ -214,3 +214,11 @@ variable "sa_install_id" {
   type        = string
   description = "Storage account id containing the install scripts"
 }
+
+variable "custom_role_assignments" {
+  type = list(object({
+    scope = string
+    role  = string
+  }))
+  default = []
+}

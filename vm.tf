@@ -81,9 +81,9 @@ resource "azurerm_role_assignment" "dj_kv_assignment" {
   principal_id         = azurerm_windows_virtual_machine.vm.identity.0.principal_id
 }
 
-# resource "azurerm_role_assignment" "custom_assignments" {
-#   for_each             = { for entry in var.custom_role_assignments : "${replace(entry.role, " ", "")}_${split("/", entry.scope)[length(split("/", entry.scope)) - 1]}" => entry }
-#   scope                = each.value.scope
-#   role_definition_name = each.value.role
-#   principal_id         = azurerm_windows_virtual_machine.vm.identity.0.principal_id
-# }
+resource "azurerm_role_assignment" "custom_assignments" {
+  for_each             = { for role in var.custom_role_assignments : role.scope => role }
+  scope                = each.value.scope
+  role_definition_name = each.value.role
+  principal_id         = azurerm_windows_virtual_machine.vm.identity.0.principal_id
+}
