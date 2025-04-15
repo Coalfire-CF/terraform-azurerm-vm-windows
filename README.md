@@ -29,7 +29,7 @@ This module can be called as outlined below.
 - Run `terraform plan` to review the resources being created.
 - If everything looks correct in the plan output, run `terraform apply`.
 
-### Usage with source_image_reference
+### Usage
 
 ```hcl
 provider "azurerm" {
@@ -70,43 +70,6 @@ module "bastion1" {
 
   vm_tags = {
     OS       = "Windows_STIG_2019"
-    Function = "Bastion"
-    Plane    = "Management"
-  }
-}
-```
-
-### Usage with source_image_id
-
-```hcl
-provider "azurerm" {
-  features {}
-}
-
-module "bastion_custom" {
-  source = "github.com/Coalfire-CF/terraform-azurerm-vm-windows"
-
-  vm_name                       = "${local.vm_name_prefix}ba1"
-  vm_admin_username             = var.vm_admin_username
-  location                      = var.location
-  resource_group_name           = data.terraform_remote_state.core.outputs.core_rg_name
-  size                          = "Standard_DS2_v2"
-  enable_public_ip              = true
-  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-bastion-sn-1"]
-  private_ip_address_allocation = "Dynamic"
-  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
-  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
-  kv_id                         = data.terraform_remote_state.core.outputs.core_kv_id
-  trusted_launch                = false
-
-  regional_tags                 = var.regional_tags
-  global_tags                   = var.global_tags
-
-  source_image_id               = data.terraform_remote_state.setup.outputs.vm_image_definitions["win-server2022-golden"]
-  source_image_reference        = null
-
-  vm_tags = {
-    OS       = "Windows_SIG"
     Function = "Bastion"
     Plane    = "Management"
   }
@@ -154,7 +117,7 @@ No modules.
 | <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | n/a | yes |
 | <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault Resource ID to store local admin password | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for resource deployment | `string` | n/a | yes |
-| <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info — only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
+| <a name="input_plan"></a> [plan](#input\_plan) | VM plan from marketplace | `map(string)` | <pre>{<br/>  "name": "cis-win-2019-stig",<br/>  "product": "cis-win-2019-stig",<br/>  "publisher": "center-for-internet-security-inc"<br/>}</pre> | no |
 | <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Static Private IP address | `string` | `""` | no |
 | <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | Dynamic or Static | `string` | `"Dynamic"` | no |
 | <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | Sku for the public IP attached to the VM. Can be `null` if no public IP needed. | `string` | `"Standard"` | no |
@@ -162,7 +125,7 @@ No modules.
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Azure Resource Group resource will be deployed in | `string` | n/a | yes |
 | <a name="input_size"></a> [size](#input\_size) | Azure Virtual Machine size | `string` | `"Standard_DS2_v2"` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | VM image from shared image gallery | `string` | `null` | no |
-| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | `null` | no |
+| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | `map(string)` | <pre>{<br/>  "offer": "cis-win-2019-stig",<br/>  "publisher": "center-for-internet-security-inc",<br/>  "sku": "cis-win-2019-stig",<br/>  "version": "latest"<br/>}</pre> | no |
 | <a name="input_storage_account_vmdiag_name"></a> [storage\_account\_vmdiag\_name](#input\_storage\_account\_vmdiag\_name) | Storage Account VM diagnostics are stored in | `string` | n/a | yes |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | ID of the subnet the VM NIC should be attached to | `string` | n/a | yes |
 | <a name="input_trusted_launch"></a> [trusted\_launch](#input\_trusted\_launch) | Enable Trusted Launch | `bool` | `true` | no |
@@ -201,4 +164,4 @@ No modules.
 
 ### Copyright
 
-Copyright © 2025 Coalfire Systems Inc.
+Copyright © 2023 Coalfire Systems Inc.
