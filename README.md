@@ -124,6 +124,7 @@ No requirements.
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | n/a |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -136,10 +137,15 @@ No modules.
 | [azurerm_key_vault_secret.xadm_pass](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_network_interface.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_public_ip.public_ip](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
+| [azurerm_role_assignment.custom_assignments](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_assignment.dj_kv_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_assignment.sa_install_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_virtual_machine_extension.custom_extension](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_virtual_machine_extension.diagnostics](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_virtual_machine_extension.vm_network_watcher](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_windows_virtual_machine.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/windows_virtual_machine) | resource |
 | [random_password.lap](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [time_sleep.wait_180_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 
 ## Inputs
 
@@ -148,10 +154,16 @@ No modules.
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | Azure Availability VM should be attached to | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | Specifies an Availability Zone in which the Windows VM should be located | `list(number)` | `null` | no |
 | <a name="input_custom_dns_label"></a> [custom\_dns\_label](#input\_custom\_dns\_label) | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | `string` | `""` | no |
+| <a name="input_custom_role_assignments"></a> [custom\_role\_assignments](#input\_custom\_role\_assignments) | n/a | <pre>list(object({<br/>    scope = string<br/>    role  = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_custom_scripts"></a> [custom\_scripts](#input\_custom\_scripts) | Custom scripts with its arguments. Will be added to custom script extension. | `string` | `""` | no |
+| <a name="input_custom_scripts_fileUris"></a> [custom\_scripts\_fileUris](#input\_custom\_scripts\_fileUris) | List with storage URLs to download custom scripts | `list(string)` | `null` | no |
 | <a name="input_disk_caching"></a> [disk\_caching](#input\_disk\_caching) | Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite] | `string` | `"ReadWrite"` | no |
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | Size of the Disk | `number` | `127` | no |
+| <a name="input_dj_kv_name"></a> [dj\_kv\_name](#input\_dj\_kv\_name) | Key Vault name containing the domain join user password | `string` | `null` | no |
+| <a name="input_domain_join"></a> [domain\_join](#input\_domain\_join) | Map with information required to join the vm to the domain | <pre>object({<br/>    domain_name             = string<br/>    disname                 = string<br/>    windows_admins_ad_group = string<br/>    user_name               = string<br/>    azure_cloud             = string<br/>    windows_domainjoin_url  = string<br/>    dj_kv_id                = string<br/>  })</pre> | `null` | no |
 | <a name="input_enable_public_ip"></a> [enable\_public\_ip](#input\_enable\_public\_ip) | True/False if a Public IP Address should be attached to the VM | `bool` | n/a | yes |
 | <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | n/a | yes |
+| <a name="input_is_domain_join"></a> [is\_domain\_join](#input\_is\_domain\_join) | n/a | `bool` | `false` | no |
 | <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault Resource ID to store local admin password | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for resource deployment | `string` | n/a | yes |
 | <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info — only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
@@ -160,6 +172,7 @@ No modules.
 | <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | Sku for the public IP attached to the VM. Can be `null` if no public IP needed. | `string` | `"Standard"` | no |
 | <a name="input_regional_tags"></a> [regional\_tags](#input\_regional\_tags) | Regional level tags | `map(string)` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Azure Resource Group resource will be deployed in | `string` | n/a | yes |
+| <a name="input_sa_install_id"></a> [sa\_install\_id](#input\_sa\_install\_id) | Storage account id containing the install scripts | `string` | n/a | yes |
 | <a name="input_size"></a> [size](#input\_size) | Azure Virtual Machine size | `string` | `"Standard_DS2_v2"` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | VM image from shared image gallery | `string` | `null` | no |
 | <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | `null` | no |
@@ -168,6 +181,7 @@ No modules.
 | <a name="input_trusted_launch"></a> [trusted\_launch](#input\_trusted\_launch) | Enable Trusted Launch | `bool` | `true` | no |
 | <a name="input_vm_admin_username"></a> [vm\_admin\_username](#input\_vm\_admin\_username) | Local Administrator Name | `string` | n/a | yes |
 | <a name="input_vm_diag_sa"></a> [vm\_diag\_sa](#input\_vm\_diag\_sa) | Storage Account VM diagnostics are stored in | `string` | n/a | yes |
+| <a name="input_vm_hostname"></a> [vm\_hostname](#input\_vm\_hostname) | (Optional) Hostname for the virtual machine. Must be 15 characters or less. | `string` | `null` | no |
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | Azure Virtual Machine Name | `string` | n/a | yes |
 | <a name="input_vm_storage_account_type"></a> [vm\_storage\_account\_type](#input\_vm\_storage\_account\_type) | The Type of Storage Account which should back the OS Disk | `string` | `"StandardSSD_LRS"` | no |
 | <a name="input_vm_tags"></a> [vm\_tags](#input\_vm\_tags) | Key/Value tags that should be added to the VM | `map(string)` | `{}` | no |

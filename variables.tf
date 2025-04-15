@@ -3,6 +3,16 @@ variable "vm_name" {
   description = "Azure Virtual Machine Name"
 }
 
+variable "vm_hostname" {
+  type        = string
+  description = "(Optional) Hostname for the virtual machine. Must be 15 characters or less."
+  validation {
+    condition     = length(var.vm_hostname) <= 15
+    error_message = "VM hostname must be 15 characters or less in length"
+  }
+  default = null
+}
+
 variable "location" {
   type        = string
   description = "Azure region for resource deployment"
@@ -155,4 +165,60 @@ variable "trusted_launch" {
   type        = bool
   description = "Enable Trusted Launch"
   default     = true
+}
+
+variable "is_domain_join" {
+  type        = bool
+  description = ""
+  default     = false
+}
+
+variable "domain_join" {
+  type = object({
+    domain_name             = string
+    disname                 = string
+    windows_admins_ad_group = string
+    user_name               = string
+    azure_cloud             = string
+    windows_domainjoin_url  = string
+    dj_kv_id                = string
+  })
+  description = "Map with information required to join the vm to the domain"
+  default     = null
+}
+
+variable "custom_scripts_fileUris" {
+  type        = list(string)
+  description = "List with storage URLs to download custom scripts"
+  default     = null
+}
+
+variable "custom_scripts" {
+  type        = string
+  description = "Custom scripts with its arguments. Will be added to custom script extension."
+  default     = ""
+  sensitive   = true
+  validation {
+    condition     = var.custom_scripts != "" ? substr(var.custom_scripts, -1, -1) == ";" : var.custom_scripts == ""
+    error_message = "The custom scripts must include a semicolon (;) at the end of the string."
+  }
+}
+
+variable "dj_kv_name" {
+  type        = string
+  description = "Key Vault name containing the domain join user password"
+  default     = null
+}
+
+variable "sa_install_id" {
+  type        = string
+  description = "Storage account id containing the install scripts"
+}
+
+variable "custom_role_assignments" {
+  type = list(object({
+    scope = string
+    role  = string
+  }))
+  default = []
 }
