@@ -117,7 +117,7 @@ No modules.
 | <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | n/a | yes |
 | <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault Resource ID to store local admin password | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for resource deployment | `string` | n/a | yes |
-| <a name="input_plan"></a> [plan](#input\_plan) | VM plan from marketplace | `map(string)` | <pre>{<br/>  "name": "cis-win-2019-stig",<br/>  "product": "cis-win-2019-stig",<br/>  "publisher": "center-for-internet-security-inc"<br/>}</pre> | no |
+| <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info — only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
 | <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Static Private IP address | `string` | `""` | no |
 | <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | Dynamic or Static | `string` | `"Dynamic"` | no |
 | <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | Sku for the public IP attached to the VM. Can be `null` if no public IP needed. | `string` | `"Standard"` | no |
@@ -125,7 +125,7 @@ No modules.
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Azure Resource Group resource will be deployed in | `string` | n/a | yes |
 | <a name="input_size"></a> [size](#input\_size) | Azure Virtual Machine size | `string` | `"Standard_DS2_v2"` | no |
 | <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | VM image from shared image gallery | `string` | `null` | no |
-| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | `map(string)` | <pre>{<br/>  "offer": "cis-win-2019-stig",<br/>  "publisher": "center-for-internet-security-inc",<br/>  "sku": "cis-win-2019-stig",<br/>  "version": "latest"<br/>}</pre> | no |
+| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | `null` | no |
 | <a name="input_storage_account_vmdiag_name"></a> [storage\_account\_vmdiag\_name](#input\_storage\_account\_vmdiag\_name) | Storage Account VM diagnostics are stored in | `string` | n/a | yes |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | ID of the subnet the VM NIC should be attached to | `string` | n/a | yes |
 | <a name="input_trusted_launch"></a> [trusted\_launch](#input\_trusted\_launch) | Enable Trusted Launch | `bool` | `true` | no |
