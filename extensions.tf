@@ -39,37 +39,46 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
       streams = ["Microsoft-WindowsEvent"]
       x_path_queries = [
         "Application!*[System[(Level=1 or Level=2 or Level=3)]]",
-        "System!*[System[(Level=1 or Level=2 or Level=3)]]",
-        "Security!*[System[(band(Keywords,13510798882111488))]]" # Both failure and successful audit log events
+        "System!*[System[(Level=1 or Level=2 or Level=3)]]"
+        # "Security!*[System[(band(Keywords,13510798882111488))]]" # Both failure and successful audit log events
       ]
     }
 
     performance_counter {
-      name                          = "windows-performance"
+      name                          = "win-perf"
       streams                       = ["Microsoft-Perf"]
       sampling_frequency_in_seconds = 60
       counter_specifiers = [
-        "\\Processor Information(_Total)\\% Processor Time",
-        "\\Processor Information(_Total)\\% Privileged Time",
-        "\\Processor Information(_Total)\\% User Time",
-        "\\System\\Processes",
-        "\\Process(_Total)\\Thread Count",
-        "\\Process(_Total)\\Handle Count",
-        "\\System\\System Up Time",
-        "\\System\\Processor Queue Length",
-        "\\Memory\\% Committed Bytes In Use",
-        "\\Memory\\Available Bytes",
-        "\\Memory\\Pages/sec",
-        "\\LogicalDisk(_Total)\\% Disk Time",
-        "\\LogicalDisk(_Total)\\Disk Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
-        "\\LogicalDisk(_Total)\\% Free Space",
-        "\\Network Interface(*)\\Bytes Total/sec",
-        "\\Network Interface(*)\\Packets Sent/sec",
-        "\\Network Interface(*)\\Packets Received/sec"
+        "\\Processor(_Total)\\% Processor Time",
+        "\\Memory\\Available Bytes"
       ]
     }
+    # performance_counter {
+    #   name                          = "windows-performance"
+    #   streams                       = ["Microsoft-Perf"]
+    #   sampling_frequency_in_seconds = 60
+    #   counter_specifiers = [
+    #     "\\Processor Information(_Total)\\% Processor Time",
+    #     "\\Processor Information(_Total)\\% Privileged Time",
+    #     "\\Processor Information(_Total)\\% User Time",
+    #     "\\System\\Processes",
+    #     "\\Process(_Total)\\Thread Count",
+    #     "\\Process(_Total)\\Handle Count",
+    #     "\\System\\System Up Time",
+    #     "\\System\\Processor Queue Length",
+    #     "\\Memory\\% Committed Bytes In Use",
+    #     "\\Memory\\Available Bytes",
+    #     "\\Memory\\Pages/sec",
+    #     "\\LogicalDisk(_Total)\\% Disk Time",
+    #     "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+    #     "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+    #     "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+    #     "\\LogicalDisk(_Total)\\% Free Space",
+    #     "\\Network Interface(*)\\Bytes Total/sec",
+    #     "\\Network Interface(*)\\Packets Sent/sec",
+    #     "\\Network Interface(*)\\Packets Received/sec"
+    #   ]
+    # }
 
     dynamic "log_file" {
       for_each = var.log_file_data_sources
@@ -94,7 +103,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   data_flow {
     streams = tolist(concat(
       ["Microsoft-WindowsEvent", "Microsoft-Perf"],
-      [for lf in var.log_file_data_sources : lf.streams]
+      # [for lf in var.log_file_data_sources : lf.streams]
     ))
     destinations = ["loganalytics"]
   }
