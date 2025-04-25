@@ -22,7 +22,7 @@ resource "azurerm_virtual_machine_extension" "ama" {
 
 # Create the data collection rule for the Azure Monitor Agent
 resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
-  name                = "${var.vm_name}-azure-monitor-agent-dcr"
+  name                = "${var.vm_name}-dcr"
   location            = var.location
   resource_group_name = var.resource_group_name
 
