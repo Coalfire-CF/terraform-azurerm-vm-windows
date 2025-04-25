@@ -93,10 +93,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   }
 
   data_flow {
-    streams = tolist(concat(
-      ["Microsoft-WindowsEvent", "Microsoft-Perf"],
-      [for lf in var.log_file_data_sources : lf.streams[0]] # grabbing the first stream
-    ))
+    streams      = ["Microsoft-WindowsEvent", "Microsoft-Perf"]
     destinations = ["loganalytics"]
   }
 }
