@@ -33,21 +33,6 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
     }
   }
 
-  data_sources {
-    windows_event_log {
-      name           = "windows-events"
-      streams        = ["Microsoft-WindowsEvent"]
-      x_path_queries = ["*![System/Level=1]"]
-    }
-
-    performance_counter {
-      name                          = "windows-performance"
-      streams                       = ["Microsoft-Perf", "Microsoft-InsightsMetrics"]
-      sampling_frequency_in_seconds = 60
-      counter_specifiers            = ["Processor(*)\\% Processor Time"]
-    }
-  }
-
   data_flow {
     streams      = ["Microsoft-WindowsEvent", "Microsoft-Perf"]
     destinations = ["loganalytics"]
