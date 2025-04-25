@@ -29,7 +29,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   destinations {
     log_analytics {
       name                  = "loganalytics"
-      workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.id
+      workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.resource_id
     }
   }
 
