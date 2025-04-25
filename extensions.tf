@@ -11,7 +11,7 @@ resource "azurerm_virtual_machine_extension" "vm_network_watcher" {
 # Installs the Azure Monitor Agent
 resource "azurerm_virtual_machine_extension" "ama" {
   name                       = "${var.vm_name}-azure-monitor-agent"
-  publisher                  = "Microsoft.Azure.Diagnostics"
+  publisher                  = "Microsoft.Azure.Monitor"
   type                       = "AzureMonitorWindowsAgent"
   type_handler_version       = "1.34" # latest as of 04/22/2025 in GovCloud
   automatic_upgrade_enabled  = true   # automatically updates the agent to latest version
