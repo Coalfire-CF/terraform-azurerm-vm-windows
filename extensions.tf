@@ -29,34 +29,22 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   destinations {
     log_analytics {
       name                  = "loganalytics"
-      workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.resource_id
+      workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.id
     }
   }
 
   data_sources {
     windows_event_log {
-      name    = "windows-events"
-      streams = ["Microsoft-WindowsEvent"]
-      x_path_queries = [
-        "Application!*[System[(Level=1 or Level=2 or Level=3)]]",
-        "System!*[System[(Level=1 or Level=2 or Level=3)]]"
-        # "Security!*[System[(band(Keywords,13510798882111488))]]" # Both failure and successful audit log events
-      ]
+      name           = "windows-events"
+      streams        = ["Microsoft-WindowsEvent"]
+      x_path_queries = ["*![System/Level=1]"]
     }
 
     performance_counter {
       name                          = "windows-performance"
-      streams                       = ["Microsoft-Perf"]
+      streams                       = ["Microsoft-Perf", "Microsoft-InsightsMetrics"]
       sampling_frequency_in_seconds = 60
-      counter_specifiers = [
-        "\\Processor(_Total)\\% Processor Time",
-        "\\Memory\\Available Bytes",
-        "\\LogicalDisk(_Total)\\% Free Space",
-        "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
-        "\\Network Interface(*)\\Bytes Total/sec",
-        "\\System\\Processes"
-      ]
+      counter_specifiers            = ["Processor(*)\\% Processor Time"]
     }
   }
 
