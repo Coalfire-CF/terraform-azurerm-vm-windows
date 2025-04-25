@@ -46,7 +46,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
 
     performance_counter {
       name                          = "windows-performance"
-      streams                       = ["Microsoft-Perf"]
+      streams                       = ["Microsoft-Perf", "Microsoft-WindowsEvent"]
       sampling_frequency_in_seconds = 60
       counter_specifiers = [
         "\\Processor Information(_Total)\\% Processor Time",
