@@ -240,3 +240,13 @@ variable "log_file_data_sources" {
   }))
   default = []
 }
+
+variable "la_name" {
+  type        = string
+  description = "Log analytics workspace name"
+}
+
+variable "la_resource_group_name" {
+  type        = string
+  description = "Log analytics resource group name"
+}

@@ -5,7 +5,7 @@ resource "azurerm_virtual_machine_extension" "vm_network_watcher" {
   type                       = "NetworkWatcherAgentWindows"
   type_handler_version       = "1.4"
   auto_upgrade_minor_version = true
-  depends_on                 = [azurerm_virtual_machine_extension.diagnostics]
+  depends_on                 = [azurerm_virtual_machine_extension.ama]
 }
 
 # Installs the Azure Monitor Agent
