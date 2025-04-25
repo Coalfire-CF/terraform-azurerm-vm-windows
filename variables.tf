@@ -235,7 +235,7 @@ variable "log_file_data_sources" {
     name                          = string
     file_patterns                 = list(string)
     format                        = string
-    streams                       = string
+    streams                       = list(string)
     record_start_timestamp_format = optional(string)
   }))
   default = []

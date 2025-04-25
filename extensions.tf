@@ -46,7 +46,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
 
     performance_counter {
       name                          = "windows-performance"
-      streams                       = ["Microsoft-Perf", "Microsoft-WindowsEvent"]
+      streams                       = ["Microsoft-Perf"]
       sampling_frequency_in_seconds = 60
       counter_specifiers = [
         "\\Processor Information(_Total)\\% Processor Time",
@@ -94,7 +94,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   data_flow {
     streams = tolist(concat(
       ["Microsoft-WindowsEvent", "Microsoft-Perf"],
-      [for lf in var.log_file_data_sources : lf.stream_name]
+      [for lf in var.log_file_data_sources : lf.streams]
     ))
     destinations = ["loganalytics"]
   }
