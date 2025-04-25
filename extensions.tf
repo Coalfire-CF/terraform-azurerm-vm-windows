@@ -108,11 +108,10 @@ resource "azurerm_monitor_data_collection_endpoint" "ama_dce" {
 }
 
 resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
-  name                        = "${var.vm_name}-azure-monitor-agent-dcr"
-  location                    = var.location
-  resource_group_name         = var.resource_group_name
-  kind                        = "Windows"
-  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.ama_dce.id
+  name                = "${var.vm_name}-azure-monitor-agent-dcr"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  kind                = "Windows"
 
   identity {
     type = "SystemAssigned"
