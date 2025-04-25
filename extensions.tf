@@ -98,11 +98,21 @@ resource "azurerm_virtual_machine_extension" "ama" {
 #   }
 # }
 
-resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
-  name                = "${var.vm_name}-azure-monitor-agent-dcr"
+resource "azurerm_monitor_data_collection_endpoint" "ama_dce" {
+  name                = "${var.vm_name}-azure-monitor-agent-dce"
   location            = var.location
   resource_group_name = var.resource_group_name
-  kind                = "Windows"
+  kind                = "Windows" # Kind can be "Linux" or "Windows" depending what you're doing, both OK for DCRs
+
+  description = "Default DCE for Azure Monitor Agent DCR"
+}
+
+resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
+  name                        = "${var.vm_name}-azure-monitor-agent-dcr"
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  kind                        = "Windows"
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.ama_dce.id
 
   identity {
     type = "SystemAssigned"
