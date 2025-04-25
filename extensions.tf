@@ -22,23 +22,85 @@ resource "azurerm_virtual_machine_extension" "ama" {
 
 # Create the data collection rule for the Azure Monitor Agent
 resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
-  name                = "${var.vm_name}-dcr"
+  name                = "${var.vm_name}-azure-monitor-agent-dcr"
   location            = var.location
   resource_group_name = var.resource_group_name
+  kind                = "Windows" # strongly recommend adding this
 
   destinations {
     log_analytics {
-      name                  = "loganalytics"
+      name                  = "loganalytics" # just a friendly name
       workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.id
     }
   }
 
-  data_flow {
-    streams      = ["Microsoft-WindowsEvent", "Microsoft-Perf"]
-    destinations = ["loganalytics"]
+  data_sources {
+    windows_event_log {
+      name    = "windows-events"
+      streams = ["Microsoft-WindowsEvent"]
+      x_path_queries = [
+        "Application!*[System[(Level=1 or Level=2 or Level=3)]]",
+        "System!*[System[(Level=1 or Level=2 or Level=3)]]",
+        "Security!*[System[(band(Keywords,13510798882111488))]]" # both success and failure audit
+      ]
+    }
+
+    performance_counter {
+      name                          = "windows-performance"
+      streams                       = ["Microsoft-Perf"]
+      sampling_frequency_in_seconds = 60
+      counter_specifiers = [
+        "\\Processor Information(_Total)\\% Processor Time",
+        "\\Processor Information(_Total)\\% Privileged Time",
+        "\\Processor Information(_Total)\\% User Time",
+        "\\System\\Processes",
+        "\\Process(_Total)\\Thread Count",
+        "\\Process(_Total)\\Handle Count",
+        "\\System\\System Up Time",
+        "\\System\\Processor Queue Length",
+        "\\Memory\\% Committed Bytes In Use",
+        "\\Memory\\Available Bytes",
+        "\\Memory\\Pages/sec",
+        "\\LogicalDisk(_Total)\\% Disk Time",
+        "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+        "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+        "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+        "\\LogicalDisk(_Total)\\% Free Space",
+        "\\Network Interface(*)\\Bytes Total/sec",
+        "\\Network Interface(*)\\Packets Sent/sec",
+        "\\Network Interface(*)\\Packets Received/sec"
+      ]
+    }
+
+    dynamic "log_file" {
+      for_each = var.log_file_data_sources
+      content {
+        name          = log_file.value.name
+        file_patterns = log_file.value.file_patterns
+        format        = log_file.value.format
+        streams       = log_file.value.streams
+
+        dynamic "settings" {
+          for_each = log_file.value.format == "text" && contains(keys(log_file.value), "record_start_timestamp_format") ? [1] : []
+          content {
+            text {
+              record_start_timestamp_format = log_file.value.record_start_timestamp_format
+            }
+          }
+        }
+      }
+    }
   }
 
+  data_flow {
+    streams = tolist(concat(
+      ["Microsoft-WindowsEvent", "Microsoft-Perf"],
+      [for lf in var.log_file_data_sources : lf.streams[0]] # grabbing the first stream
+    ))
+    destinations = ["loganalytics"]
+  }
 }
+
 
 # Associate the data collection rule with the Azure Monitor Agent on the VM
 resource "azurerm_monitor_data_collection_rule_association" "ama_dcr_assoc" {
