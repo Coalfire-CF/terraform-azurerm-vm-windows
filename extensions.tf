@@ -129,7 +129,9 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
       name    = "windows-events"
       streams = ["Microsoft-WindowsEvent"]
       x_path_queries = [
-        "*"
+        "Application!*[System[(Level=1 or Level=2 or Level=3)]]",
+        "System!*[System[(Level=1 or Level=2 or Level=3)]]",
+        "Security!*[System[(Level=1 or Level=2 or Level=3)]]",
       ]
     }
 
