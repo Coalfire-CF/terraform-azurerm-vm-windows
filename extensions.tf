@@ -104,6 +104,10 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   resource_group_name = var.resource_group_name
   kind                = "Windows"
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   destinations {
     log_analytics {
       name                  = "loganalytics"
