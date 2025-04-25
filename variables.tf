@@ -222,3 +222,21 @@ variable "custom_role_assignments" {
   }))
   default = []
 }
+
+variable "ama_settings" {
+  description = "Optional settings to pass to the Azure Monitor Agent extension"
+  type        = map(any)
+  default     = {}
+}
+
+variable "log_file_data_sources" {
+  description = "Optional list of log_file blocks for AMA DCR"
+  type = list(object({
+    name                          = string
+    file_patterns                 = list(string)
+    format                        = string
+    streams                       = string
+    record_start_timestamp_format = optional(string)
+  }))
+  default = []
+}
