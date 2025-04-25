@@ -103,7 +103,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
 # Associate the data collection rule with the Azure Monitor Agent on the VM
 resource "azurerm_monitor_data_collection_rule_association" "ama_dcr_assoc" {
   name                    = "${var.vm_name}-azure-monitor-agent-dcr-assoc"
-  target_resource_id      = azurerm_linux_virtual_machine.vm.id
+  target_resource_id      = azurerm_windows_virtual_machine.vm.id
   data_collection_rule_id = azurerm_monitor_data_collection_rule.ama_dcr.id
 }
 
