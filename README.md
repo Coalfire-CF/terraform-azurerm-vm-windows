@@ -135,22 +135,26 @@ No modules.
 | Name | Type |
 |------|------|
 | [azurerm_key_vault_secret.xadm_pass](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_monitor_data_collection_rule.ama_dcr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule) | resource |
+| [azurerm_monitor_data_collection_rule_association.ama_dcr_assoc](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association) | resource |
 | [azurerm_network_interface.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_public_ip.public_ip](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
 | [azurerm_role_assignment.custom_assignments](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.dj_kv_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [azurerm_role_assignment.sa_install_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_virtual_machine_extension.ama](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_virtual_machine_extension.custom_extension](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
-| [azurerm_virtual_machine_extension.diagnostics](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_virtual_machine_extension.vm_network_watcher](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_windows_virtual_machine.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/windows_virtual_machine) | resource |
 | [random_password.lap](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [time_sleep.wait_180_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [azurerm_log_analytics_workspace.log_analytics](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/log_analytics_workspace) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_ama_settings"></a> [ama\_settings](#input\_ama\_settings) | Optional settings to pass to the Azure Monitor Agent extension | `map(any)` | `{}` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | Azure Availability VM should be attached to | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | Specifies an Availability Zone in which the Windows VM should be located | `list(number)` | `null` | no |
 | <a name="input_custom_dns_label"></a> [custom\_dns\_label](#input\_custom\_dns\_label) | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | `string` | `""` | no |
@@ -165,7 +169,10 @@ No modules.
 | <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | n/a | yes |
 | <a name="input_is_domain_join"></a> [is\_domain\_join](#input\_is\_domain\_join) | n/a | `bool` | `false` | no |
 | <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault Resource ID to store local admin password | `string` | `null` | no |
+| <a name="input_la_name"></a> [la\_name](#input\_la\_name) | Log analytics workspace name | `string` | n/a | yes |
+| <a name="input_la_resource_group_name"></a> [la\_resource\_group\_name](#input\_la\_resource\_group\_name) | Log analytics resource group name | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for resource deployment | `string` | n/a | yes |
+| <a name="input_performance_counters"></a> [performance\_counters](#input\_performance\_counters) | Performance counters to collect | <pre>list(object({<br/>    name                          = string<br/>    streams                       = list(string)<br/>    sampling_frequency_in_seconds = number<br/>    counter_specifiers            = list(string)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "counter_specifiers": [<br/>      "\\Processor Information(_Total)\\% Processor Time",<br/>      "\\Processor Information(_Total)\\% Privileged Time",<br/>      "\\Processor Information(_Total)\\% User Time",<br/>      "\\Processor Information(_Total)\\Processor Frequency",<br/>      "\\System\\Processes",<br/>      "\\Process(_Total)\\Thread Count",<br/>      "\\Process(_Total)\\Handle Count",<br/>      "\\System\\System Up Time",<br/>      "\\System\\Context Switches/sec",<br/>      "\\System\\Processor Queue Length",<br/>      "\\Memory\\% Committed Bytes In Use",<br/>      "\\Memory\\Available Bytes",<br/>      "\\Memory\\Committed Bytes",<br/>      "\\Memory\\Cache Bytes",<br/>      "\\Memory\\Pool Paged Bytes",<br/>      "\\Memory\\Pool Nonpaged Bytes",<br/>      "\\Memory\\Pages/sec",<br/>      "\\Memory\\Page Faults/sec",<br/>      "\\Process(_Total)\\Working Set",<br/>      "\\Process(_Total)\\Working Set - Private",<br/>      "\\LogicalDisk(_Total)\\% Disk Time",<br/>      "\\LogicalDisk(_Total)\\% Disk Read Time",<br/>      "\\LogicalDisk(_Total)\\% Disk Write Time",<br/>      "\\LogicalDisk(_Total)\\% Idle Time",<br/>      "\\LogicalDisk(_Total)\\Disk Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Transfers/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Reads/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Writes/sec",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",<br/>      "\\LogicalDisk(_Total)\\% Free Space",<br/>      "\\LogicalDisk(_Total)\\Free Megabytes",<br/>      "\\Network Interface(*)\\Bytes Total/sec",<br/>      "\\Network Interface(*)\\Bytes Sent/sec",<br/>      "\\Network Interface(*)\\Bytes Received/sec",<br/>      "\\Network Interface(*)\\Packets/sec",<br/>      "\\Network Interface(*)\\Packets Sent/sec",<br/>      "\\Network Interface(*)\\Packets Received/sec",<br/>      "\\Network Interface(*)\\Packets Outbound Errors",<br/>      "\\Network Interface(*)\\Packets Received Errors"<br/>    ],<br/>    "name": "windows-performance",<br/>    "sampling_frequency_in_seconds": 60,<br/>    "streams": [<br/>      "Microsoft-Perf"<br/>    ]<br/>  }<br/>]</pre> | no |
 | <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info — only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
 | <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Static Private IP address | `string` | `""` | no |
 | <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | Dynamic or Static | `string` | `"Dynamic"` | no |
@@ -185,6 +192,7 @@ No modules.
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | Azure Virtual Machine Name | `string` | n/a | yes |
 | <a name="input_vm_storage_account_type"></a> [vm\_storage\_account\_type](#input\_vm\_storage\_account\_type) | The Type of Storage Account which should back the OS Disk | `string` | `"StandardSSD_LRS"` | no |
 | <a name="input_vm_tags"></a> [vm\_tags](#input\_vm\_tags) | Key/Value tags that should be added to the VM | `map(string)` | `{}` | no |
+| <a name="input_windows_event_logs"></a> [windows\_event\_logs](#input\_windows\_event\_logs) | Windows Event Logs to collect | <pre>list(object({<br/>    name           = string<br/>    streams        = list(string)<br/>    x_path_queries = list(string)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "name": "windows-events",<br/>    "streams": [<br/>      "Microsoft-Event"<br/>    ],<br/>    "x_path_queries": [<br/>      "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]",<br/>      "Security!*[System[(band(Keywords,13510798882111488))]]",<br/>      "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]"<br/>    ]<br/>  }<br/>]</pre> | no |
 
 ## Outputs
 
