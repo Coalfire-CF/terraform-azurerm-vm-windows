@@ -60,25 +60,6 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
       }
     }
   }
-  # Default is empty
-  dynamic "log_file" {
-    for_each = var.log_file_data_sources
-    content {
-      name          = log_file.value.name
-      streams       = log_file.value.streams
-      file_patterns = log_file.value.file_patterns
-      format        = log_file.value.format
-
-      dynamic "settings" {
-        for_each = log_file.value.format == "text" && contains(keys(log_file.value), "record_start_timestamp_format") ? [1] : []
-        content {
-          text {
-            record_start_timestamp_format = log_file.value.record_start_timestamp_format
-          }
-        }
-      }
-    }
-  }
 
   data_flow {
     streams      = ["Microsoft-Event", "Microsoft-Perf"]

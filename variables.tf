@@ -323,15 +323,3 @@ variable "performance_counters" {
     }
   ]
 }
-
-variable "log_file_data_sources" {
-  description = "Optional Log Files to collect."
-  type = list(object({
-    name                          = string
-    streams                       = list(string)
-    file_patterns                 = list(string)
-    format                        = string
-    record_start_timestamp_format = optional(string)
-  }))
-  default = []
-}
