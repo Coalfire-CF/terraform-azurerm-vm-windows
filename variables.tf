@@ -229,18 +229,6 @@ variable "ama_settings" {
   default     = {}
 }
 
-variable "log_file_data_sources" {
-  description = "Optional list of log_file blocks for AMA DCR"
-  type = list(object({
-    name                          = string
-    file_patterns                 = list(string)
-    format                        = string
-    streams                       = list(string)
-    record_start_timestamp_format = optional(string)
-  }))
-  default = []
-}
-
 variable "la_name" {
   type        = string
   description = "Log analytics workspace name"
