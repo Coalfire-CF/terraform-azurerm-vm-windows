@@ -20,93 +20,7 @@ resource "azurerm_virtual_machine_extension" "ama" {
   settings                   = jsonencode(var.ama_settings)
 }
 
-# Create the data collection rule for the Azure Monitor Agent
-# resource "azurerm_monitor_data_collection_rule" "ama_dcr1" {
-#   name                = "${var.vm_name}-azure-monitor-agent-dcr"
-#   location            = var.location
-#   resource_group_name = var.resource_group_name
-#   kind                = "Windows" # strongly recommend adding this
-
-#   destinations {
-#     log_analytics {
-#       name                  = "loganalytics" # just a friendly name
-#       workspace_resource_id = data.azurerm_log_analytics_workspace.log_analytics.id
-#     }
-#   }
-
-#   data_sources {
-#     windows_event_log {
-#       name    = "windows-events"
-#       streams = ["Microsoft-WindowsEvent"]
-#       x_path_queries = [
-#         "Application!*[System[(Level=1 or Level=2 or Level=3)]]",
-#         "System!*[System[(Level=1 or Level=2 or Level=3)]]",
-#         "Security!*[System[(band(Keywords,13510798882111488))]]" # both success and failure audit
-#       ]
-#     }
-
-#     performance_counter {
-#       name                          = "windows-performance"
-#       streams                       = ["Microsoft-Perf"]
-#       sampling_frequency_in_seconds = 60
-#       counter_specifiers = [
-#         "\\Processor Information(_Total)\\% Processor Time",
-#         "\\Processor Information(_Total)\\% Privileged Time",
-#         "\\Processor Information(_Total)\\% User Time",
-#         "\\System\\Processes",
-#         "\\Process(_Total)\\Thread Count",
-#         "\\Process(_Total)\\Handle Count",
-#         "\\System\\System Up Time",
-#         "\\System\\Processor Queue Length",
-#         "\\Memory\\% Committed Bytes In Use",
-#         "\\Memory\\Available Bytes",
-#         "\\Memory\\Pages/sec",
-#         "\\LogicalDisk(_Total)\\% Disk Time",
-#         "\\LogicalDisk(_Total)\\Disk Bytes/sec",
-#         "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
-#         "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
-#         "\\LogicalDisk(_Total)\\% Free Space",
-#         "\\Network Interface(*)\\Bytes Total/sec",
-#         "\\Network Interface(*)\\Packets Sent/sec",
-#         "\\Network Interface(*)\\Packets Received/sec"
-#       ]
-#     }
-
-#     dynamic "log_file" {
-#       for_each = var.log_file_data_sources
-#       content {
-#         name          = log_file.value.name
-#         file_patterns = log_file.value.file_patterns
-#         format        = log_file.value.format
-#         streams       = log_file.value.streams
-
-#         dynamic "settings" {
-#           for_each = log_file.value.format == "text" && contains(keys(log_file.value), "record_start_timestamp_format") ? [1] : []
-#           content {
-#             text {
-#               record_start_timestamp_format = log_file.value.record_start_timestamp_format
-#             }
-#           }
-#         }
-#       }
-#     }
-#   }
-
-#   data_flow {
-#     streams      = ["Microsoft-WindowsEvent", "Microsoft-Perf"]
-#     destinations = ["loganalytics"]
-#   }
-# }
-
-resource "azurerm_monitor_data_collection_endpoint" "ama_dce" {
-  name                = "${var.vm_name}-azure-monitor-agent-dce"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  kind                = "Windows" # Kind can be "Linux" or "Windows" depending what you're doing, both OK for DCRs
-
-  description = "Default DCE for Azure Monitor Agent DCR"
-}
-
+# Create the data collection rule defaulted to grab all performance metrics and log events
 resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   name                = "${var.vm_name}-azure-monitor-agent-dcr"
   location            = var.location
@@ -124,69 +38,45 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
     }
   }
 
+  # Default is all events and levels
   data_sources {
-    windows_event_log {
-      name    = "windows-events"
-      streams = ["Microsoft-Event"] # <-- **Corrected!!**
-      x_path_queries = [
-        "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]",
-        "Security!*[System[(band(Keywords,13510798882111488))]]",
-        "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]"
-      ]
+    dynamic "windows_event_log" {
+      for_each = var.windows_event_logs
+      content {
+        name           = windows_event_log.value.name
+        streams        = windows_event_log.value.streams
+        x_path_queries = windows_event_log.value.x_path_queries
+      }
     }
 
-    performance_counter {
-      name                          = "windows-performance"
-      streams                       = ["Microsoft-Perf"]
-      sampling_frequency_in_seconds = 60
-      counter_specifiers = [
-        "\\Processor Information(_Total)\\% Processor Time",
-        "\\Processor Information(_Total)\\% Privileged Time",
-        "\\Processor Information(_Total)\\% User Time",
-        "\\Processor Information(_Total)\\Processor Frequency",
-        "\\System\\Processes",
-        "\\Process(_Total)\\Thread Count",
-        "\\Process(_Total)\\Handle Count",
-        "\\System\\System Up Time",
-        "\\System\\Context Switches/sec",
-        "\\System\\Processor Queue Length",
-        "\\Memory\\% Committed Bytes In Use",
-        "\\Memory\\Available Bytes",
-        "\\Memory\\Committed Bytes",
-        "\\Memory\\Cache Bytes",
-        "\\Memory\\Pool Paged Bytes",
-        "\\Memory\\Pool Nonpaged Bytes",
-        "\\Memory\\Pages/sec",
-        "\\Memory\\Page Faults/sec",
-        "\\Process(_Total)\\Working Set",
-        "\\Process(_Total)\\Working Set - Private",
-        "\\LogicalDisk(_Total)\\% Disk Time",
-        "\\LogicalDisk(_Total)\\% Disk Read Time",
-        "\\LogicalDisk(_Total)\\% Disk Write Time",
-        "\\LogicalDisk(_Total)\\% Idle Time",
-        "\\LogicalDisk(_Total)\\Disk Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
-        "\\LogicalDisk(_Total)\\Disk Transfers/sec",
-        "\\LogicalDisk(_Total)\\Disk Reads/sec",
-        "\\LogicalDisk(_Total)\\Disk Writes/sec",
-        "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
-        "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
-        "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
-        "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
-        "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
-        "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
-        "\\LogicalDisk(_Total)\\% Free Space",
-        "\\LogicalDisk(_Total)\\Free Megabytes",
-        "\\Network Interface(*)\\Bytes Total/sec",
-        "\\Network Interface(*)\\Bytes Sent/sec",
-        "\\Network Interface(*)\\Bytes Received/sec",
-        "\\Network Interface(*)\\Packets/sec",
-        "\\Network Interface(*)\\Packets Sent/sec",
-        "\\Network Interface(*)\\Packets Received/sec",
-        "\\Network Interface(*)\\Packets Outbound Errors",
-        "\\Network Interface(*)\\Packets Received Errors"
-      ]
+    # Default is all metrics 60 seconds
+    dynamic "performance_counter" {
+      for_each = var.performance_counters
+      content {
+        name                          = performance_counter.value.name
+        streams                       = performance_counter.value.streams
+        sampling_frequency_in_seconds = performance_counter.value.sampling_frequency_in_seconds
+        counter_specifiers            = performance_counter.value.counter_specifiers
+      }
+    }
+  }
+  # Default is empty
+  dynamic "log_file" {
+    for_each = var.log_file_data_sources
+    content {
+      name          = log_file.value.name
+      streams       = log_file.value.streams
+      file_patterns = log_file.value.file_patterns
+      format        = log_file.value.format
+
+      dynamic "settings" {
+        for_each = log_file.value.format == "text" && contains(keys(log_file.value), "record_start_timestamp_format") ? [1] : []
+        content {
+          text {
+            record_start_timestamp_format = log_file.value.record_start_timestamp_format
+          }
+        }
+      }
     }
   }
 
@@ -195,8 +85,6 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
     destinations = ["loganalytics"]
   }
 }
-
-
 
 # Associate the data collection rule with the Azure Monitor Agent on the VM
 resource "azurerm_monitor_data_collection_rule_association" "ama_dcr_assoc" {
