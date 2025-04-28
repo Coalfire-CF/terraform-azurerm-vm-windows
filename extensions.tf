@@ -191,7 +191,7 @@ resource "azurerm_monitor_data_collection_rule" "ama_dcr" {
   }
 
   data_flow {
-    streams      = ["Microsoft-WindowsEvent", "Microsoft-Perf"]
+    streams      = ["Microsoft-Event", "Microsoft-Perf"]
     destinations = ["loganalytics"]
   }
 }
