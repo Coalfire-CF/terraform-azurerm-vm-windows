@@ -222,3 +222,104 @@ variable "custom_role_assignments" {
   }))
   default = []
 }
+
+variable "ama_settings" {
+  description = "Optional settings to pass to the Azure Monitor Agent extension"
+  type        = map(any)
+  default     = {}
+}
+
+variable "la_name" {
+  type        = string
+  description = "Log analytics workspace name"
+}
+
+variable "la_resource_group_name" {
+  type        = string
+  description = "Log analytics resource group name"
+}
+
+variable "windows_event_logs" {
+  description = "Windows Event Logs to collect"
+  type = list(object({
+    name           = string
+    streams        = list(string)
+    x_path_queries = list(string)
+  }))
+  default = [
+    {
+      name    = "windows-events"
+      streams = ["Microsoft-Event"]
+      x_path_queries = [
+        "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]",
+        "Security!*[System[(band(Keywords,13510798882111488))]]",
+        "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]"
+      ]
+    }
+  ]
+}
+
+variable "performance_counters" {
+  description = "Performance counters to collect"
+  type = list(object({
+    name                          = string
+    streams                       = list(string)
+    sampling_frequency_in_seconds = number
+    counter_specifiers            = list(string)
+  }))
+  default = [
+    {
+      name                          = "windows-performance"
+      streams                       = ["Microsoft-Perf"]
+      sampling_frequency_in_seconds = 60
+      counter_specifiers = [
+        "\\Processor Information(_Total)\\% Processor Time",
+        "\\Processor Information(_Total)\\% Privileged Time",
+        "\\Processor Information(_Total)\\% User Time",
+        "\\Processor Information(_Total)\\Processor Frequency",
+        "\\System\\Processes",
+        "\\Process(_Total)\\Thread Count",
+        "\\Process(_Total)\\Handle Count",
+        "\\System\\System Up Time",
+        "\\System\\Context Switches/sec",
+        "\\System\\Processor Queue Length",
+        "\\Memory\\% Committed Bytes In Use",
+        "\\Memory\\Available Bytes",
+        "\\Memory\\Committed Bytes",
+        "\\Memory\\Cache Bytes",
+        "\\Memory\\Pool Paged Bytes",
+        "\\Memory\\Pool Nonpaged Bytes",
+        "\\Memory\\Pages/sec",
+        "\\Memory\\Page Faults/sec",
+        "\\Process(_Total)\\Working Set",
+        "\\Process(_Total)\\Working Set - Private",
+        "\\LogicalDisk(_Total)\\% Disk Time",
+        "\\LogicalDisk(_Total)\\% Disk Read Time",
+        "\\LogicalDisk(_Total)\\% Disk Write Time",
+        "\\LogicalDisk(_Total)\\% Idle Time",
+        "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+        "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+        "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+        "\\LogicalDisk(_Total)\\Disk Transfers/sec",
+        "\\LogicalDisk(_Total)\\Disk Reads/sec",
+        "\\LogicalDisk(_Total)\\Disk Writes/sec",
+        "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
+        "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
+        "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
+        "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
+        "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
+        "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
+        "\\LogicalDisk(_Total)\\% Free Space",
+        "\\LogicalDisk(_Total)\\Free Megabytes",
+        "\\Network Interface(*)\\Bytes Total/sec",
+        "\\Network Interface(*)\\Bytes Sent/sec",
+        "\\Network Interface(*)\\Bytes Received/sec",
+        "\\Network Interface(*)\\Packets/sec",
+        "\\Network Interface(*)\\Packets Sent/sec",
+        "\\Network Interface(*)\\Packets Received/sec",
+        "\\Network Interface(*)\\Packets Outbound Errors",
+        "\\Network Interface(*)\\Packets Received Errors"
+      ]
+    }
+  ]
+}
