@@ -323,3 +323,25 @@ variable "performance_counters" {
     }
   ]
 }
+
+variable "recovery_vault_name" {
+  description = "Name of the Recovery Services Vault to use for Backup and Site Recovery"
+  type        = string
+}
+
+variable "recovery_vault_rg" {
+  description = "Name of the Recovery Services Vault's Resource Group to use for Backup and Site Recovery"
+  type        = string
+}
+
+variable "enable_site_recovery" {
+  description = "Enable Azure Site Recovery for this VM"
+  type        = bool
+  default     = false
+}
+
+variable "target_region" {
+  description = "Target region for site recovery"
+  type        = string
+  default     = "usgovtexas"
+}
