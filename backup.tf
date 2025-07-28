@@ -5,5 +5,5 @@ module "vm_backup" {
   vm_id               = azurerm_windows_virtual_machine.vm.id
   policy_name         = local.backup_policy_name
   start_time          = "05:00" # midnight EST
-  enable_backup       = true
+  enable_backup       = false
 }
