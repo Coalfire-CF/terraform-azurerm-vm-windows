@@ -324,14 +324,24 @@ variable "performance_counters" {
   ]
 }
 
-variable "recovery_vault_name" {
-  description = "Name of the Recovery Services Vault to use for Backup and Site Recovery"
+variable "recovery_vault_rg" {
+  description = "Resource group of the Recovery Services vault"
   type        = string
+  default     = ""
+  validation {
+    condition     = !var.enable_site_recovery || length(var.recovery_vault_rg) > 0
+    error_message = "recovery_vault_rg must be set when enable_site_recovery = true"
+  }
 }
 
-variable "recovery_vault_rg" {
-  description = "Name of the Recovery Services Vault's Resource Group to use for Backup and Site Recovery"
+variable "recovery_vault_name" {
+  description = "Name of the Recovery Services vault"
   type        = string
+  default     = ""
+  validation {
+    condition     = !var.enable_site_recovery || length(var.recovery_vault_name) > 0
+    error_message = "recovery_vault_name must be set when enable_site_recovery = true"
+  }
 }
 
 variable "enable_site_recovery" {
