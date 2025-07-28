@@ -17,3 +17,7 @@ locals {
     var.custom_scripts_fileUris
   )
 }
+
+locals {
+  backup_policy_name = "${var.vm_name}-backup-policy"
+}
