@@ -224,3 +224,19 @@ No modules.
 ### Copyright
 
 Copyright © 2025 Coalfire Systems Inc.
+## Tree
+```
+.
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- README.md
+|-- coalfire_logo.png
+|-- data.tf
+|-- extensions.tf
+|-- locals.tf
+|-- network.tf
+|-- outputs.tf
+|-- release-please-config.json
+|-- variables.tf
+|-- vm.tf
+```
