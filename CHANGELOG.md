@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.1.1](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.0...v1.1.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* update license year to 2026 ([#30](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/30)) ([c318e7a](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/c318e7a1f83f53adcb7e5de5048f40d75e3bf317))
+
+
+### Miscellaneous
+
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-checkov.yml ([#34](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/34)) ([a004d67](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/a004d679f31f04530f355790d1a69af41bc26a17))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-dependabot.yml ([#36](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/36)) ([5e98a05](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/5e98a05b269706505025ef7bdfac375abf49ebaf))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-markdown-lint.yml ([aba4d48](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/aba4d485164381e682fbb1227ab3f3409ec18cd6))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-markdown-lint.yml from 0.1.0 to 0.1.1 ([a34f03c](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/a34f03c97317ef4d3fc12b487c2bbfab2747c86f))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-release.yml ([50377f3](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/50377f356f0a3bcefc581767e81b653a4379d498))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-release.yml from 0.1.0 to 0.1.1 ([5c95a0b](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/5c95a0bda62cd8805737b3cb90a6dbedd795716f))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-terraform-docs.yml ([42117b0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/42117b0ac8fb0175301b7bb4f6a8989e9c7c3aca))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-terraform-docs.yml from 0.1.0 to 0.1.1 ([1838a58](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/1838a582e6713a9ec72a65bbe7c65d0f6734b874))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-terraform-fmt.yml ([2928ced](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/2928cedeeca1671b9db7b6dae5da0a1d218c97d7))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-terraform-fmt.yml from 0.1.0 to 0.1.1 ([f1f4c9e](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/f1f4c9e365d2df065fa721bfce6dee486dc09456))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-terraform-validate.yml ([#35](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/35)) ([c2d1205](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/c2d1205c42c292f8044d99ec6be54549d8c203e8))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-tree-readme.yml ([716f31d](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/716f31d105826a8f4234e63baae66b5f7d7d9547))
+* **deps:** bump Coalfire-CF/Actions/.github/workflows/org-tree-readme.yml from 0.1.0 to 0.1.1 ([f1c5885](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/f1c58851f8e978c79f6260b2b0f3896340eafe58))
+* update org-release.yml to v0.2.1 ([#37](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/37)) ([a98d425](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/a98d425fbf2d7a619a2cd8770fcd45ff04bcd532))
+
 ## [1.1.0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.0.4...v1.1.0) (2025-11-07)
 
 
