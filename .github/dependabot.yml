@@ -11,6 +11,18 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    labels:
+      - "dep/github-actions"
+    groups:
+      org-actions:
+        applies-to: version-updates
+        patterns: ["Coalfire-CF/*"]
+        update-types: ["minor", "patch"]
+      third-party:
+        applies-to: version-updates
+        patterns: ["*"]
+        exclude-patterns: ["Coalfire-CF/*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: "terraform"
     directory: "/"
     schedule:
@@ -19,3 +31,5 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    labels:
+      - "dep/terraform-module"
