@@ -224,7 +224,9 @@ No modules.
 ### Copyright
 
 Copyright © 2025 Coalfire Systems Inc.
+
 ## Tree
+
 ```text
 .
 |-- CHANGELOG.md
