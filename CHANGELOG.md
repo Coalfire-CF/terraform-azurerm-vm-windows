@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.2](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.1...v1.1.2) (2026-07-23)
+
+
+### Miscellaneous
+
+* adopt Actions v0.12.1 (bypass auto-merge + event-driven re-merge) ([e03b17b](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/e03b17bb810a416186e8ad8e30e6482dce5e3ee4))
+* **ci:** add org-dependabot-auto-merge caller (v0.11.3) ([#123](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/123)) ([ffc8dea](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/ffc8deadd6cf9516d6f2cabb757e50551ceb233e))
+* **ci:** adopt Coalfire-CF/Actions v0.11.3 ([#121](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/121)) ([ab33813](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/ab3381311caee78504c1c39daace10a61d5b8e03))
+* **deps:** bump the org-actions group with 8 updates ([#124](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/124)) ([b12ec22](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/b12ec22eff1a17b1e20244c3d161a64e2a9e5869))
+* **deps:** bump the org-actions group with 8 updates ([#125](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/125)) ([90e752d](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/90e752dc16803902516f0ba8a15106e4261693d4))
+* **deps:** bump the org-actions group with 8 updates ([#126](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/126)) ([d89c80a](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/d89c80a60a60501159622ca9341442277c4a5536))
+
 ## [1.1.1](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.0...v1.1.1) (2026-07-06)
 
 
