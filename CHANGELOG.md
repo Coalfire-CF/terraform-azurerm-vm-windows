@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.2...v2.0.0) (2026-10-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* require Terraform 1.16 and azurerm 5.7 ([#142](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/142))
+
+### Features
+
+* require Terraform 1.16 and azurerm 5.7 ([#142](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/142)) ([a12b43d](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/a12b43dc99e0c1390185435cfa01c0894f5c1c59))
+
 ## [1.1.2](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.1...v1.1.2) (2026-10-20)
 
 
