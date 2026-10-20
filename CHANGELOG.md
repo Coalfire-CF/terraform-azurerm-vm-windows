@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v2.0.0...v2.0.1) (2026-10-20)
+
+
+### Miscellaneous
+
+* **deps:** bump the org-actions group across 1 directory with 7 updates ([#141](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/141)) ([6d9ff33](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/6d9ff33c76efcda09db5a57371e4429a635e8dba))
+
 ## [2.0.0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v1.1.2...v2.0.0) (2026-10-20)
 
 
