@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v2.0.1...v3.0.0) (2026-10-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* vm_tags is now tags. diag_log_analytics_id replaces la_name and la_resource_group_name. storage_account_vmdiag_name is removed. kv_id is required. availability_zone is a string. custom_scripts is PowerShell and the join script must be a .ps1 taking the parameters in the README.
+
+### Features
+
+* require Terraform 1.16.6 and azurerm 5.10 ([#145](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/145)) ([0fab2a7](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/0fab2a7ad96b2d556f2af155947d4e88641c558b))
+
 ## [2.0.1](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v2.0.0...v2.0.1) (2026-10-20)
 
 
