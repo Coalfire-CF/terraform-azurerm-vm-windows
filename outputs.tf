@@ -19,26 +19,26 @@ output "vm_name" {
 }
 
 output "network_interface_ids" {
-  value       = azurerm_network_interface.nic.*.id
+  value       = azurerm_network_interface.nic[*].id
   description = "IDs of the VM NICs provisioned."
 }
 
 output "network_interface_private_ip" {
-  value       = azurerm_network_interface.nic.*.private_ip_address
+  value       = azurerm_network_interface.nic[*].private_ip_address
   description = "Private IP addresses of the VM NICs"
 }
 
 output "public_ip_id" {
-  value       = azurerm_public_ip.public_ip.*.id
+  value       = azurerm_public_ip.public_ip[*].id
   description = "ID of the public IP address provisioned."
 }
 
 output "public_ip_address" {
-  value       = azurerm_public_ip.public_ip.*.ip_address
+  value       = azurerm_public_ip.public_ip[*].ip_address
   description = "The IP address allocated for the resource."
 }
 
 output "public_ip_dns_name" {
-  value       = azurerm_public_ip.public_ip.*.fqdn
+  value       = azurerm_public_ip.public_ip[*].fqdn
   description = "FQDN to connect to the first VM provisioned."
 }

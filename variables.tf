@@ -1,13 +1,17 @@
 variable "vm_name" {
   type        = string
   description = "Azure Virtual Machine Name"
+  validation {
+    condition     = var.vm_hostname != null || length(var.vm_name) <= 15
+    error_message = "vm_name is used as the Windows computer name when vm_hostname is null, so it must be 15 characters or less. Set vm_hostname or shorten vm_name."
+  }
 }
 
 variable "vm_hostname" {
   type        = string
   description = "(Optional) Hostname for the virtual machine. Must be 15 characters or less."
   validation {
-    condition     = length(var.vm_hostname) <= 15
+    condition     = var.vm_hostname == null || length(var.vm_hostname) <= 15
     error_message = "VM hostname must be 15 characters or less in length"
   }
   default = null
@@ -25,13 +29,13 @@ variable "resource_group_name" {
 
 variable "vm_admin_username" {
   type        = string
-  description = "Local Administrator Name"
+  description = "Local administrator user name."
 }
 
 variable "size" {
   type        = string
   description = "Azure Virtual Machine size"
-  default     = "Standard_DS2_v2"
+  default     = "Standard_D2s_v5"
 }
 
 variable "source_image_reference" {
@@ -41,7 +45,7 @@ variable "source_image_reference" {
     sku       = string
     version   = string
   })
-  description = "VM image from shared image gallery"
+  description = "Marketplace image reference. Set this or source_image_id, not both."
   default     = null
 }
 
@@ -51,14 +55,18 @@ variable "plan" {
     name      = string
     product   = string
   })
-  description = "Marketplace plan info — only required if using a Marketplace image that includes a plan."
+  description = "Marketplace plan info. Only required if using a Marketplace image that includes a plan."
   default     = null
 }
 
 variable "source_image_id" {
   type        = string
-  description = "VM image from shared image gallery"
+  description = "Image ID, for example a shared image gallery version. Set this or source_image_reference, not both."
   default     = null
+  validation {
+    condition     = (var.source_image_id == null) != (var.source_image_reference == null)
+    error_message = "Set exactly one of source_image_id or source_image_reference."
+  }
 }
 
 variable "availability_set_id" {
@@ -68,30 +76,41 @@ variable "availability_set_id" {
 }
 
 variable "availability_zone" {
-  type        = list(number)
-  description = "Specifies an Availability Zone in which the Windows VM should be located"
+  type        = string
+  description = "Availability zone (\"1\", \"2\" or \"3\"). Default null: no zone pinning. Cannot be combined with availability_set_id."
   default     = null
+  validation {
+    condition     = var.availability_zone == null || contains(["1", "2", "3"], var.availability_zone)
+    error_message = "availability_zone must be \"1\", \"2\" or \"3\"."
+  }
+  validation {
+    condition     = var.availability_zone == null || var.availability_set_id == null
+    error_message = "Set availability_zone or availability_set_id, not both."
+  }
 }
 
 variable "enable_public_ip" {
   type        = bool
-  description = "True/False if a Public IP Address should be attached to the VM"
+  description = "Attach a public IP to the VM. Default false. Setting true exposes the VM to the internet; use only with an NSG that restricts management ports (R9, R10)."
+  default     = false
 }
 
-variable "vm_tags" {
+variable "tags" {
   type        = map(string)
-  description = "Key/Value tags that should be added to the VM"
+  description = "Tags for every taggable resource. Merged with regional_tags and global_tags; tags wins on key collisions."
   default     = {}
 }
 
 variable "regional_tags" {
   type        = map(string)
   description = "Regional level tags"
+  default     = {}
 }
 
 variable "global_tags" {
   type        = map(string)
   description = "Global level tags"
+  default     = {}
 }
 
 variable "custom_dns_label" {
@@ -109,12 +128,20 @@ variable "private_ip_address_allocation" {
   type        = string
   description = "Dynamic or Static"
   default     = "Dynamic"
+  validation {
+    condition     = contains(["Dynamic", "Static"], var.private_ip_address_allocation)
+    error_message = "private_ip_address_allocation must be Dynamic or Static."
+  }
 }
 
 variable "private_ip" {
   type        = string
-  description = "Static Private IP address"
-  default     = ""
+  description = "Static private IP. Required when private_ip_address_allocation is Static."
+  default     = null
+  validation {
+    condition     = var.private_ip_address_allocation != "Static" || var.private_ip != null
+    error_message = "private_ip is required when private_ip_address_allocation is Static."
+  }
 }
 
 variable "public_ip_sku" {
@@ -125,8 +152,17 @@ variable "public_ip_sku" {
 
 variable "kv_id" {
   type        = string
-  description = "Key Vault Resource ID to store local admin password"
-  default     = null
+  description = "Key Vault ID that stores the generated local admin password. Required."
+}
+
+variable "admin_password_expiration_days" {
+  type        = number
+  description = "Days until the local admin password secret is marked expired in Key Vault. The expiry is informational: the secret can still be read after it, for recovery. The module does not rotate the password."
+  default     = 365
+  validation {
+    condition     = var.admin_password_expiration_days > 0
+    error_message = "admin_password_expiration_days must be greater than 0."
+  }
 }
 
 variable "vm_diag_sa" {
@@ -134,9 +170,9 @@ variable "vm_diag_sa" {
   description = "Storage Account VM diagnostics are stored in"
 }
 
-variable "storage_account_vmdiag_name" {
+variable "diag_log_analytics_id" {
   type        = string
-  description = "Storage Account VM diagnostics are stored in"
+  description = "Log Analytics workspace ID for the data collection rule and diagnostic settings."
 }
 
 variable "disk_caching" {
@@ -144,7 +180,7 @@ variable "disk_caching" {
   description = "Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite]"
   default     = "ReadWrite"
   validation {
-    condition     = contains(["None, ReadOnly", "ReadWrite"], var.disk_caching)
+    condition     = contains(["None", "ReadOnly", "ReadWrite"], var.disk_caching)
     error_message = "Error: Must be one of [None, ReadOnly, ReadWrite]."
   }
 }
@@ -161,16 +197,30 @@ variable "disk_size" {
   default     = 127
 }
 
+variable "encryption_at_host_enabled" {
+  type        = bool
+  description = "Encrypt temp disk and caches at the host. Set false only for a size that does not support encryption at host; disabling it leaves those caches encrypted by platform keys only."
+  default     = true
+}
+
 variable "trusted_launch" {
   type        = bool
-  description = "Enable Trusted Launch"
+  description = "Enable Trusted Launch: sets secure boot and vTPM. Needs a Gen2 image."
   default     = true
 }
 
 variable "is_domain_join" {
   type        = bool
-  description = ""
+  description = "Join the VM to Active Directory through the custom script extension. Requires domain_join and dj_kv_name. The script at domain_join.windows_domainjoin_url must be a PowerShell .ps1 that accepts the parameters listed in the README."
   default     = false
+  validation {
+    condition     = !var.is_domain_join || (var.domain_join != null && var.dj_kv_name != null)
+    error_message = "is_domain_join = true needs domain_join and dj_kv_name."
+  }
+  validation {
+    condition     = !var.is_domain_join || var.domain_join == null || endswith(lower(var.domain_join.windows_domainjoin_url), ".ps1")
+    error_message = "domain_join.windows_domainjoin_url must point to a .ps1 script."
+  }
 }
 
 variable "domain_join" {
@@ -183,19 +233,20 @@ variable "domain_join" {
     windows_domainjoin_url  = string
     dj_kv_id                = string
   })
-  description = "Map with information required to join the vm to the domain"
+  description = "Map with information required to join the vm to the domain. windows_domainjoin_url is a PowerShell .ps1 script. disname is passed as -OUPath."
   default     = null
 }
 
 variable "custom_scripts_fileUris" {
   type        = list(string)
   description = "List with storage URLs to download custom scripts"
-  default     = null
+  default     = []
+  nullable    = false
 }
 
 variable "custom_scripts" {
   type        = string
-  description = "Custom scripts with its arguments. Will be added to custom script extension."
+  description = "PowerShell statements run by the custom script extension after domain join. Each statement ends with a semicolon."
   default     = ""
   sensitive   = true
   validation {
@@ -220,23 +271,14 @@ variable "custom_role_assignments" {
     scope = string
     role  = string
   }))
-  default = []
+  description = "Extra role assignments for the VM's system-assigned identity. Each item gives a scope and a role name."
+  default     = []
 }
 
 variable "ama_settings" {
   description = "Optional settings to pass to the Azure Monitor Agent extension"
   type        = map(any)
   default     = {}
-}
-
-variable "la_name" {
-  type        = string
-  description = "Log analytics workspace name"
-}
-
-variable "la_resource_group_name" {
-  type        = string
-  description = "Log analytics resource group name"
 }
 
 variable "windows_event_logs" {
@@ -267,6 +309,10 @@ variable "performance_counters" {
     sampling_frequency_in_seconds = number
     counter_specifiers            = list(string)
   }))
+  validation {
+    condition     = length(var.performance_counters) + length(var.windows_event_logs) > 0
+    error_message = "At least one data source is required for the data collection rule."
+  }
   default = [
     {
       name                          = "windows-performance"

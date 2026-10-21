@@ -4,7 +4,7 @@
 
 # terraform-azurerm-vm-windows
 
-This module is used in the [Coalfire-Azure-RAMPpak](https://github.com/Coalfire-CF/Coalfire-Azure-RAMPpak) FedRAMP Framework. It will create a Windows Virtual Machine using managed disks.
+This module is used in the [Coalfire-Azure-RAMPpak](https://github.com/Coalfire-CF/Coalfire-Azure-RAMPpak) FedRAMP Framework. It creates a Windows virtual machine with managed disks.
 
 Learn more at [Coalfire OpenSource](https://coalfire.com/opensource).
 
@@ -16,120 +16,129 @@ Learn more at [Coalfire OpenSource](https://coalfire.com/opensource).
 ## Resource List
 
 - VM
-- VM Nic
+- VM NIC
 - Public IP (optional)
-- AKV secret
-- Diagnostics extension
-- Network watcher extension
+- Key Vault secret for the local admin password
+- Azure Monitor Agent extension and data collection rule
+- Network Watcher extension
+- Custom script extension (optional, for domain join and custom scripts)
+- Diagnostic settings for the VM, NIC, public IP and data collection rule
 
-## Deployment Steps
+## Usage
 
-This module can be called as outlined below.
-
-- Change directories to the `Bastion` directory.
-- From the `/terraform/prod/us-va/mgmt/bastion` directory run `terraform init`.
-- Run `terraform plan` to review the resources being created.
-- If everything looks correct in the plan output, run `terraform apply`.
-
-### Usage with source\_image\_reference
+The module has no provider block. The caller configures `azurerm` for Azure Government.
+See [`examples/default`](examples/default) for a complete root.
 
 ```hcl
-provider "azurerm" {
-  features {}
-}
+module "vm" {
+  source = "git::https://github.com/Coalfire-CF/terraform-azurerm-vm-windows?ref=v3.0.0"
 
-module "bastion1" {
-  source = "github.com/Coalfire-CF/terraform-azurerm-vm-windows"
-
-  vm_name                       = "${local.vm_name_prefix}ba1"
-  vm_admin_username             = var.vm_admin_username
-  location                      = var.location
-  resource_group_name           = data.terraform_remote_state.core.outputs.core_rg_name
-  size                          = "Standard_DS2_v2"
-  enable_public_ip              = true
-  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-bastion-sn-1"]
-  private_ip_address_allocation = "Dynamic"
-  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
-  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
-  kv_id                         = data.terraform_remote_state.core.outputs.core_kv_id
-  trusted_launch                = false # For now, we are not using trusted launch. Fails with the CIS marketplace image.
-
-  regional_tags                 = var.regional_tags
-  global_tags                   = var.global_tags
+  vm_name               = "app-win-1"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
+  vm_admin_username     = "xadm"
+  subnet_id             = var.subnet_id
+  kv_id                 = var.kv_id
+  vm_diag_sa            = var.vm_diag_sa
+  sa_install_id         = var.sa_install_id
+  diag_log_analytics_id = var.diag_log_analytics_id
 
   source_image_reference = {
-    publisher = "center-for-internet-security-inc"
-    offer     = "cis-win-2019-stig"
-    sku       = "cis-win-2019-stig"
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-datacenter-azure-edition"
     version   = "latest"
   }
 
-  plan = {
-    publisher = "center-for-internet-security-inc"
-    name      = "cis-win-2019-stig"
-    product   = "cis-win-2019-stig"
-  }
-
-  vm_tags = {
-    OS       = "Windows_STIG_2019"
-    Function = "Bastion"
-    Plane    = "Management"
+  tags = {
+    Function = "App"
   }
 }
 ```
 
-### Usage with source\_image\_id
+Set exactly one of `source_image_reference` or `source_image_id`.
 
-```hcl
-provider "azurerm" {
-  features {}
-}
+## Password handling
 
-module "bastion_custom" {
-  source = "github.com/Coalfire-CF/terraform-azurerm-vm-windows"
+The module generates the local admin password and writes it to the Key Vault at `kv_id`
+through the write-only `value_wo` argument. The password is still in state, through
+`random_password` and the VM's `admin_password`, because azurerm 5.10.0 has no
+`admin_password_wo` on `azurerm_windows_virtual_machine`. Protect the state.
 
-  vm_name                       = "${local.vm_name_prefix}ba1"
-  vm_admin_username             = var.vm_admin_username
-  location                      = var.location
-  resource_group_name           = data.terraform_remote_state.core.outputs.core_rg_name
-  size                          = "Standard_DS2_v2"
-  enable_public_ip              = true
-  subnet_id                     = data.terraform_remote_state.usgv_mgmt_vnet.outputs.usgv_mgmt_vnet_subnet_ids["${local.resource_prefix}-bastion-sn-1"]
-  private_ip_address_allocation = "Dynamic"
-  vm_diag_sa                    = data.terraform_remote_state.setup.outputs.vmdiag_endpoint
-  storage_account_vmdiag_name   = data.terraform_remote_state.setup.outputs.storage_account_vmdiag_name
-  kv_id                         = data.terraform_remote_state.core.outputs.core_kv_id
-  trusted_launch                = false
+The secret is marked expired after `admin_password_expiration_days`. The expiry is
+informational. Key Vault still returns an expired secret on a get, so the break-glass
+password stays readable for recovery. The module does not rotate the password.
 
-  regional_tags                 = var.regional_tags
-  global_tags                   = var.global_tags
+## Diagnostics
 
-  source_image_id               = data.terraform_remote_state.setup.outputs.vm_image_definitions["win-server2022-golden"]
-  source_image_reference        = null
+The VM, NIC, public IP and data collection rule use module-owned diagnostic settings,
+because `terraform-azurerm-diagnostics` v3.0.0 has no resource type for them (decision D1).
+Each sends its log categories and `AllMetrics` to `diag_log_analytics_id`. The data
+collection rule sends Windows event logs and performance counters to the same workspace.
 
-  vm_tags = {
-    OS       = "Windows_SIG"
-    Function = "Bastion"
-    Plane    = "Management"
-  }
-}
-```
+## Extension order
+
+Extensions install one at a time: Azure Monitor Agent, then Network Watcher, then the custom
+script. The custom script also waits 180 seconds after the role assignments, so the VM
+identity can read the install storage account and the domain join Key Vault. The wait and the
+custom script exist only when domain join or `custom_scripts_fileUris` is set.
+
+## Custom script and domain join
+
+The custom script extension runs PowerShell through `-EncodedCommand`. `custom_scripts` is
+PowerShell statements, each ending in `;`.
+
+- The script sets `$ErrorActionPreference = 'Stop'`, so a PowerShell error stops it and fails
+  the extension.
+- A native program that returns a non-zero exit code does not stop the script. Check
+  `$LASTEXITCODE` yourself in `custom_scripts` when it matters.
+- A join script that ends with a non-zero exit code stops the run and fails the extension.
+- Keep inline statements short. The encoded command is about 2.7 times the script length and
+  cmd.exe allows 8191 characters. Put long logic in a downloaded script file.
+
+Domain join runs the `.ps1` at `domain_join.windows_domainjoin_url` from the download
+directory with these parameters:
+
+| Parameter | Source |
+| --- | --- |
+| `-DomainName` | `domain_join.domain_name` |
+| `-OUPath` | `domain_join.disname` |
+| `-AdminsGroup` | `domain_join.windows_admins_ad_group` |
+| `-UserName` | `domain_join.user_name` |
+| `-KeyVaultName` | `dj_kv_name` |
+| `-HostName` | the VM computer name |
+| `-AzureCloud` | `domain_join.azure_cloud` |
+
+The caller supplies the script. It is not part of this module. Domain join has not been tested
+in a live deployment.
+
+## Other defaults
+
+- Computer name: `vm_hostname`, or `vm_name` when it is null. Either must be 15 characters or
+  less.
+- Public IP: off by default. Set `enable_public_ip = true` only with an NSG that restricts
+  management ports.
+- Encryption at host: on by default. Turn it off only for a size that does not support it.
+- Trusted launch: sets secure boot and vTPM, and needs a Gen2 image.
+- Availability zone: none by default. It cannot be combined with `availability_set_id`.
 
 <!-- markdownlint-disable MD033 MD034 MD060 -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.16 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.7 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.16.6, < 2.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.10 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.9 |
+| <a name="requirement_time"></a> [time](#requirement\_time) | ~> 0.14 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 5.7 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 5.10 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~> 3.9 |
+| <a name="provider_time"></a> [time](#provider\_time) | ~> 0.14 |
 
 ## Modules
 
@@ -142,6 +151,10 @@ No modules.
 | [azurerm_key_vault_secret.xadm_pass](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_monitor_data_collection_rule.ama_dcr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule) | resource |
 | [azurerm_monitor_data_collection_rule_association.ama_dcr_assoc](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association) | resource |
+| [azurerm_monitor_diagnostic_setting.dcr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
+| [azurerm_monitor_diagnostic_setting.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
+| [azurerm_monitor_diagnostic_setting.public_ip](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
+| [azurerm_monitor_diagnostic_setting.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
 | [azurerm_network_interface.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_public_ip.public_ip](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
 | [azurerm_role_assignment.custom_assignments](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
@@ -152,51 +165,51 @@ No modules.
 | [azurerm_virtual_machine_extension.vm_network_watcher](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_windows_virtual_machine.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/windows_virtual_machine) | resource |
 | [random_password.lap](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [time_offset.lap_expiry](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/offset) | resource |
 | [time_sleep.wait_180_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
-| [azurerm_log_analytics_workspace.log_analytics](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/log_analytics_workspace) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_admin_password_expiration_days"></a> [admin\_password\_expiration\_days](#input\_admin\_password\_expiration\_days) | Days until the local admin password secret is marked expired in Key Vault. The expiry is informational: the secret can still be read after it, for recovery. The module does not rotate the password. | `number` | `365` | no |
 | <a name="input_ama_settings"></a> [ama\_settings](#input\_ama\_settings) | Optional settings to pass to the Azure Monitor Agent extension | `map(any)` | `{}` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | Azure Availability VM should be attached to | `string` | `null` | no |
-| <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | Specifies an Availability Zone in which the Windows VM should be located | `list(number)` | `null` | no |
+| <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | Availability zone ("1", "2" or "3"). Default null: no zone pinning. Cannot be combined with availability\_set\_id. | `string` | `null` | no |
 | <a name="input_custom_dns_label"></a> [custom\_dns\_label](#input\_custom\_dns\_label) | The DNS label to use for public access. VM name if not set. DNS will be <label>.eastus2.cloudapp.azure.com | `string` | `""` | no |
-| <a name="input_custom_role_assignments"></a> [custom\_role\_assignments](#input\_custom\_role\_assignments) | n/a | <pre>list(object({<br/>    scope = string<br/>    role  = string<br/>  }))</pre> | `[]` | no |
-| <a name="input_custom_scripts"></a> [custom\_scripts](#input\_custom\_scripts) | Custom scripts with its arguments. Will be added to custom script extension. | `string` | `""` | no |
-| <a name="input_custom_scripts_fileUris"></a> [custom\_scripts\_fileUris](#input\_custom\_scripts\_fileUris) | List with storage URLs to download custom scripts | `list(string)` | `null` | no |
+| <a name="input_custom_role_assignments"></a> [custom\_role\_assignments](#input\_custom\_role\_assignments) | Extra role assignments for the VM's system-assigned identity. Each item gives a scope and a role name. | <pre>list(object({<br/>    scope = string<br/>    role  = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_custom_scripts"></a> [custom\_scripts](#input\_custom\_scripts) | PowerShell statements run by the custom script extension after domain join. Each statement ends with a semicolon. | `string` | `""` | no |
+| <a name="input_custom_scripts_fileUris"></a> [custom\_scripts\_fileUris](#input\_custom\_scripts\_fileUris) | List with storage URLs to download custom scripts | `list(string)` | `[]` | no |
+| <a name="input_diag_log_analytics_id"></a> [diag\_log\_analytics\_id](#input\_diag\_log\_analytics\_id) | Log Analytics workspace ID for the data collection rule and diagnostic settings. | `string` | n/a | yes |
 | <a name="input_disk_caching"></a> [disk\_caching](#input\_disk\_caching) | Type of caching used for Internal OS Disk - Must be one of [None, ReadOnly, ReadWrite] | `string` | `"ReadWrite"` | no |
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | Size of the Disk | `number` | `127` | no |
 | <a name="input_dj_kv_name"></a> [dj\_kv\_name](#input\_dj\_kv\_name) | Key Vault name containing the domain join user password | `string` | `null` | no |
-| <a name="input_domain_join"></a> [domain\_join](#input\_domain\_join) | Map with information required to join the vm to the domain | <pre>object({<br/>    domain_name             = string<br/>    disname                 = string<br/>    windows_admins_ad_group = string<br/>    user_name               = string<br/>    azure_cloud             = string<br/>    windows_domainjoin_url  = string<br/>    dj_kv_id                = string<br/>  })</pre> | `null` | no |
-| <a name="input_enable_public_ip"></a> [enable\_public\_ip](#input\_enable\_public\_ip) | True/False if a Public IP Address should be attached to the VM | `bool` | n/a | yes |
-| <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | n/a | yes |
-| <a name="input_is_domain_join"></a> [is\_domain\_join](#input\_is\_domain\_join) | n/a | `bool` | `false` | no |
-| <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault Resource ID to store local admin password | `string` | `null` | no |
-| <a name="input_la_name"></a> [la\_name](#input\_la\_name) | Log analytics workspace name | `string` | n/a | yes |
-| <a name="input_la_resource_group_name"></a> [la\_resource\_group\_name](#input\_la\_resource\_group\_name) | Log analytics resource group name | `string` | n/a | yes |
+| <a name="input_domain_join"></a> [domain\_join](#input\_domain\_join) | Map with information required to join the vm to the domain. windows\_domainjoin\_url is a PowerShell .ps1 script. disname is passed as -OUPath. | <pre>object({<br/>    domain_name             = string<br/>    disname                 = string<br/>    windows_admins_ad_group = string<br/>    user_name               = string<br/>    azure_cloud             = string<br/>    windows_domainjoin_url  = string<br/>    dj_kv_id                = string<br/>  })</pre> | `null` | no |
+| <a name="input_enable_public_ip"></a> [enable\_public\_ip](#input\_enable\_public\_ip) | Attach a public IP to the VM. Default false. Setting true exposes the VM to the internet; use only with an NSG that restricts management ports (R9, R10). | `bool` | `false` | no |
+| <a name="input_encryption_at_host_enabled"></a> [encryption\_at\_host\_enabled](#input\_encryption\_at\_host\_enabled) | Encrypt temp disk and caches at the host. Set false only for a size that does not support encryption at host; disabling it leaves those caches encrypted by platform keys only. | `bool` | `true` | no |
+| <a name="input_global_tags"></a> [global\_tags](#input\_global\_tags) | Global level tags | `map(string)` | `{}` | no |
+| <a name="input_is_domain_join"></a> [is\_domain\_join](#input\_is\_domain\_join) | Join the VM to Active Directory through the custom script extension. Requires domain\_join and dj\_kv\_name. The script at domain\_join.windows\_domainjoin\_url must be a PowerShell .ps1 that accepts the parameters listed in the README. | `bool` | `false` | no |
+| <a name="input_kv_id"></a> [kv\_id](#input\_kv\_id) | Key Vault ID that stores the generated local admin password. Required. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for resource deployment | `string` | n/a | yes |
 | <a name="input_performance_counters"></a> [performance\_counters](#input\_performance\_counters) | Performance counters to collect | <pre>list(object({<br/>    name                          = string<br/>    streams                       = list(string)<br/>    sampling_frequency_in_seconds = number<br/>    counter_specifiers            = list(string)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "counter_specifiers": [<br/>      "\\Processor Information(_Total)\\% Processor Time",<br/>      "\\Processor Information(_Total)\\% Privileged Time",<br/>      "\\Processor Information(_Total)\\% User Time",<br/>      "\\Processor Information(_Total)\\Processor Frequency",<br/>      "\\System\\Processes",<br/>      "\\Process(_Total)\\Thread Count",<br/>      "\\Process(_Total)\\Handle Count",<br/>      "\\System\\System Up Time",<br/>      "\\System\\Context Switches/sec",<br/>      "\\System\\Processor Queue Length",<br/>      "\\Memory\\% Committed Bytes In Use",<br/>      "\\Memory\\Available Bytes",<br/>      "\\Memory\\Committed Bytes",<br/>      "\\Memory\\Cache Bytes",<br/>      "\\Memory\\Pool Paged Bytes",<br/>      "\\Memory\\Pool Nonpaged Bytes",<br/>      "\\Memory\\Pages/sec",<br/>      "\\Memory\\Page Faults/sec",<br/>      "\\Process(_Total)\\Working Set",<br/>      "\\Process(_Total)\\Working Set - Private",<br/>      "\\LogicalDisk(_Total)\\% Disk Time",<br/>      "\\LogicalDisk(_Total)\\% Disk Read Time",<br/>      "\\LogicalDisk(_Total)\\% Disk Write Time",<br/>      "\\LogicalDisk(_Total)\\% Idle Time",<br/>      "\\LogicalDisk(_Total)\\Disk Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Transfers/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Reads/sec",<br/>      "\\LogicalDisk(_Total)\\Disk Writes/sec",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",<br/>      "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",<br/>      "\\LogicalDisk(_Total)\\% Free Space",<br/>      "\\LogicalDisk(_Total)\\Free Megabytes",<br/>      "\\Network Interface(*)\\Bytes Total/sec",<br/>      "\\Network Interface(*)\\Bytes Sent/sec",<br/>      "\\Network Interface(*)\\Bytes Received/sec",<br/>      "\\Network Interface(*)\\Packets/sec",<br/>      "\\Network Interface(*)\\Packets Sent/sec",<br/>      "\\Network Interface(*)\\Packets Received/sec",<br/>      "\\Network Interface(*)\\Packets Outbound Errors",<br/>      "\\Network Interface(*)\\Packets Received Errors"<br/>    ],<br/>    "name": "windows-performance",<br/>    "sampling_frequency_in_seconds": 60,<br/>    "streams": [<br/>      "Microsoft-Perf"<br/>    ]<br/>  }<br/>]</pre> | no |
-| <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info — only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
-| <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Static Private IP address | `string` | `""` | no |
+| <a name="input_plan"></a> [plan](#input\_plan) | Marketplace plan info. Only required if using a Marketplace image that includes a plan. | <pre>object({<br/>    publisher = string<br/>    name      = string<br/>    product   = string<br/>  })</pre> | `null` | no |
+| <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Static private IP. Required when private\_ip\_address\_allocation is Static. | `string` | `null` | no |
 | <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | Dynamic or Static | `string` | `"Dynamic"` | no |
 | <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | Sku for the public IP attached to the VM. Can be `null` if no public IP needed. | `string` | `"Standard"` | no |
-| <a name="input_regional_tags"></a> [regional\_tags](#input\_regional\_tags) | Regional level tags | `map(string)` | n/a | yes |
+| <a name="input_regional_tags"></a> [regional\_tags](#input\_regional\_tags) | Regional level tags | `map(string)` | `{}` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Azure Resource Group resource will be deployed in | `string` | n/a | yes |
 | <a name="input_sa_install_id"></a> [sa\_install\_id](#input\_sa\_install\_id) | Storage account id containing the install scripts | `string` | n/a | yes |
-| <a name="input_size"></a> [size](#input\_size) | Azure Virtual Machine size | `string` | `"Standard_DS2_v2"` | no |
-| <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | VM image from shared image gallery | `string` | `null` | no |
-| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | VM image from shared image gallery | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | `null` | no |
-| <a name="input_storage_account_vmdiag_name"></a> [storage\_account\_vmdiag\_name](#input\_storage\_account\_vmdiag\_name) | Storage Account VM diagnostics are stored in | `string` | n/a | yes |
+| <a name="input_size"></a> [size](#input\_size) | Azure Virtual Machine size | `string` | `"Standard_D2s_v5"` | no |
+| <a name="input_source_image_id"></a> [source\_image\_id](#input\_source\_image\_id) | Image ID, for example a shared image gallery version. Set this or source\_image\_reference, not both. | `string` | `null` | no |
+| <a name="input_source_image_reference"></a> [source\_image\_reference](#input\_source\_image\_reference) | Marketplace image reference. Set this or source\_image\_id, not both. | <pre>object({<br/>    publisher = string<br/>    offer     = string<br/>    sku       = string<br/>    version   = string<br/>  })</pre> | `null` | no |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | ID of the subnet the VM NIC should be attached to | `string` | n/a | yes |
-| <a name="input_trusted_launch"></a> [trusted\_launch](#input\_trusted\_launch) | Enable Trusted Launch | `bool` | `true` | no |
-| <a name="input_vm_admin_username"></a> [vm\_admin\_username](#input\_vm\_admin\_username) | Local Administrator Name | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags for every taggable resource. Merged with regional\_tags and global\_tags; tags wins on key collisions. | `map(string)` | `{}` | no |
+| <a name="input_trusted_launch"></a> [trusted\_launch](#input\_trusted\_launch) | Enable Trusted Launch: sets secure boot and vTPM. Needs a Gen2 image. | `bool` | `true` | no |
+| <a name="input_vm_admin_username"></a> [vm\_admin\_username](#input\_vm\_admin\_username) | Local administrator user name. | `string` | n/a | yes |
 | <a name="input_vm_diag_sa"></a> [vm\_diag\_sa](#input\_vm\_diag\_sa) | Storage Account VM diagnostics are stored in | `string` | n/a | yes |
 | <a name="input_vm_hostname"></a> [vm\_hostname](#input\_vm\_hostname) | (Optional) Hostname for the virtual machine. Must be 15 characters or less. | `string` | `null` | no |
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | Azure Virtual Machine Name | `string` | n/a | yes |
 | <a name="input_vm_storage_account_type"></a> [vm\_storage\_account\_type](#input\_vm\_storage\_account\_type) | The Type of Storage Account which should back the OS Disk | `string` | `"StandardSSD_LRS"` | no |
-| <a name="input_vm_tags"></a> [vm\_tags](#input\_vm\_tags) | Key/Value tags that should be added to the VM | `map(string)` | `{}` | no |
 | <a name="input_windows_event_logs"></a> [windows\_event\_logs](#input\_windows\_event\_logs) | Windows Event Logs to collect | <pre>list(object({<br/>    name           = string<br/>    streams        = list(string)<br/>    x_path_queries = list(string)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "name": "windows-events",<br/>    "streams": [<br/>      "Microsoft-Event"<br/>    ],<br/>    "x_path_queries": [<br/>      "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]",<br/>      "Security!*[System[(band(Keywords,13510798882111488))]]",<br/>      "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]"<br/>    ]<br/>  }<br/>]</pre> | no |
 
 ## Outputs
