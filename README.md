@@ -4,7 +4,8 @@
 
 # terraform-azurerm-vm-windows
 
-This module is used in the [Coalfire-Azure-RAMPpak](https://github.com/Coalfire-CF/Coalfire-Azure-RAMPpak) FedRAMP Framework. It creates a Windows virtual machine with managed disks.
+This module is used in the [Coalfire-Azure-RAMPpak](https://github.com/Coalfire-CF/Coalfire-Azure-RAMPpak) FedRAMP
+Framework. It creates a Windows virtual machine with managed disks.
 
 Learn more at [Coalfire OpenSource](https://coalfire.com/opensource).
 
