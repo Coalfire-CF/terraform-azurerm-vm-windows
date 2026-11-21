@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v3.0.0...v3.0.1) (2026-11-06)
+
+
+### Documentation
+
+* wrap Markdown lines at 120 characters (Coalfire-CF/Actions[#375](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/375)) ([#147](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/issues/147)) ([1bb279f](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/commit/1bb279f17d1df5100c94bfa37208e3022c65459e))
+
 ## [3.0.0](https://github.com/Coalfire-CF/terraform-azurerm-vm-windows/compare/v2.0.1...v3.0.0) (2026-10-21)
 
 
